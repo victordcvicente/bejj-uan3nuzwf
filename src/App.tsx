@@ -1,28 +1,51 @@
-/* Main App Component - Handles routing (using react-router-dom), query client and other providers - use this file to add all routes */
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom'
 import { Toaster } from '@/components/ui/toaster'
 import { Toaster as Sonner } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
-import Index from './pages/Index'
-import NotFound from './pages/NotFound'
+import { StoreProvider } from './store'
 import Layout from './components/Layout'
 
-// ONLY IMPORT AND RENDER WORKING PAGES, NEVER ADD PLACEHOLDER COMPONENTS OR PAGES IN THIS FILE
-// AVOID REMOVING ANY CONTEXT PROVIDERS FROM THIS FILE (e.g. TooltipProvider, Toaster, Sonner)
+import Index from './pages/Index'
+import TeamHome from './pages/TeamHome'
+import Catalog from './pages/Catalog'
+import ProductDetail from './pages/ProductDetail'
+import Checkout from './pages/Checkout'
+import Tracking from './pages/Tracking'
+
+import AdminDashboard from './pages/admin/AdminDashboard'
+import ProductionDashboard from './pages/production/ProductionDashboard'
+import ProfessorDashboard from './pages/professor/ProfessorDashboard'
+import NotFound from './pages/NotFound'
 
 const App = () => (
   <BrowserRouter future={{ v7_startTransition: false, v7_relativeSplatPath: false }}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <Routes>
-        <Route element={<Layout />}>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES MUST BE ADDED HERE */}
-        </Route>
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </TooltipProvider>
+    <StoreProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <Routes>
+          <Route element={<Layout />}>
+            <Route path="/" element={<Index />} />
+
+            {/* Global Student Routes */}
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/tracking" element={<Tracking />} />
+
+            {/* Management Routes */}
+            <Route path="/admin/*" element={<AdminDashboard />} />
+            <Route path="/production/*" element={<ProductionDashboard />} />
+            <Route path="/professor/*" element={<ProfessorDashboard />} />
+
+            {/* Team Specific Routes (must be last to not catch /checkout etc as slugs) */}
+            <Route path="/:teamSlug" element={<TeamHome />} />
+            <Route path="/:teamSlug/catalog" element={<Catalog />} />
+            <Route path="/:teamSlug/product/:productId" element={<ProductDetail />} />
+          </Route>
+
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </TooltipProvider>
+    </StoreProvider>
   </BrowserRouter>
 )
 
