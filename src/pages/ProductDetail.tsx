@@ -26,12 +26,12 @@ export default function ProductDetail() {
     (tp) => tp.productId === productId && tp.teamId === team?.id,
   )
 
+  const [selectedSize, setSelectedSize] = useState(teamProduct?.sizes[0] || '')
+  const [selectedColor, setSelectedColor] = useState(teamProduct?.colors[0] || '')
+  const [customValues, setCustomValues] = useState<Record<string, string>>({})
+
   if (!team || !product || !teamProduct)
     return <div className="p-20 text-center">Produto não encontrado.</div>
-
-  const [selectedSize, setSelectedSize] = useState(teamProduct.sizes[0] || '')
-  const [selectedColor, setSelectedColor] = useState(teamProduct.colors[0] || '')
-  const [customValues, setCustomValues] = useState<Record<string, string>>({})
 
   const customPrice = teamProduct.customizationFields.reduce((acc, field) => {
     if (customValues[field.name] && customValues[field.name].trim() !== '') {
