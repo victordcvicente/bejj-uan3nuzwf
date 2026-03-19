@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label'
 import { getErrorMessage } from '@/lib/pocketbase/errors'
 import { useToast } from '@/hooks/use-toast'
 
-const resizeImg = (f: File, maxWidth = 800): Promise<string> =>
+const resizeImg = (f: File, initialMaxWidth = 800): Promise<string> =>
   new Promise((res) => {
     const r = new FileReader()
     r.onload = (e) => {
@@ -19,19 +19,37 @@ const resizeImg = (f: File, maxWidth = 800): Promise<string> =>
         const c = document.createElement('canvas')
         let w = i.width,
           h = i.height
-        if (w > maxWidth) {
-          h = Math.round((h * maxWidth) / w)
-          w = maxWidth
+        if (w > initialMaxWidth) {
+          h = Math.round((h * initialMaxWidth) / w)
+          w = initialMaxWidth
         }
-        c.width = w
-        c.height = h
-        const ctx = c.getContext('2d')
-        if (ctx) {
-          ctx.drawImage(i, 0, 0, w, h)
-          res(c.toDataURL('image/jpeg', 0.6))
-        } else {
-          res(e.target?.result as string)
+
+        let quality = 0.7
+        let b64 = ''
+
+        const compress = () => {
+          c.width = w
+          c.height = h
+          const ctx = c.getContext('2d')
+          if (ctx) {
+            ctx.fillStyle = '#FFFFFF'
+            ctx.fillRect(0, 0, w, h)
+            ctx.drawImage(i, 0, 0, w, h)
+            b64 = c.toDataURL('image/jpeg', quality)
+
+            if (b64.length > 4900 && w > 20) {
+              w = Math.round(w * 0.7)
+              h = Math.round(h * 0.7)
+              quality = Math.max(0.1, quality - 0.15)
+              compress()
+            } else {
+              res(b64)
+            }
+          } else {
+            res(e.target?.result as string)
+          }
         }
+        compress()
       }
       i.src = e.target?.result as string
     }
@@ -59,6 +77,25 @@ export default function GlobalCatalog() {
 
   const handleSave = async () => {
     if (editTeamId) {
+      if (form.logo && form.logo.length > 5000) {
+        toast({
+          title: 'Erro de Validação',
+          description:
+            'O logo excede o limite permitido (5.000 caracteres). Tente uma imagem mais simples.',
+          variant: 'destructive',
+        })
+        return
+      }
+      if (form.coverImage && form.coverImage.length > 5000) {
+        toast({
+          title: 'Erro de Validação',
+          description:
+            'A imagem de capa excede o limite permitido (5.000 caracteres). Tente uma imagem mais simples.',
+          variant: 'destructive',
+        })
+        return
+      }
+
       setLoading(true)
       try {
         const teamToUpdate = teams.find((t) => t.id === editTeamId)
@@ -92,8 +129,16 @@ export default function GlobalCatalog() {
   ) => {
     const file = e.target.files?.[0]
     if (file) {
-      const maxWidth = field === 'logo' ? 400 : 1000
+      const maxWidth = field === 'logo' ? 150 : 300
       const b64 = await resizeImg(file, maxWidth)
+      if (b64.length > 5000) {
+        toast({
+          title: 'Aviso',
+          description:
+            'A imagem escolhida não pôde ser comprimida o suficiente. Por favor, escolha outra.',
+          variant: 'destructive',
+        })
+      }
       setForm((prev) => ({ ...prev, [field]: b64 }))
     }
   }
