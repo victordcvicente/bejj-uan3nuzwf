@@ -61,6 +61,9 @@ export default function Catalog() {
     filteredProducts = filteredProducts.filter((tp) => tp.inStock)
   }
 
+  // Defend against missing products that were deleted
+  const safeProducts = filteredProducts.filter((tp) => products.some((p) => p.id === tp.productId))
+
   return (
     <div className="container mx-auto px-4 py-8 animate-fade-in-up">
       <div className="flex flex-col md:flex-row gap-8 items-start md:items-center justify-between mb-8 pb-6 border-b">
@@ -102,11 +105,11 @@ export default function Catalog() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {filteredProducts.map((tp) => {
+        {safeProducts.map((tp) => {
           const product = products.find((p) => p.id === tp.productId)!
           return <ProductCard key={tp.id} teamProduct={tp} product={product} team={team!} />
         })}
-        {filteredProducts.length === 0 && (
+        {safeProducts.length === 0 && (
           <div className="col-span-full py-20 text-center text-muted-foreground border-2 border-dashed rounded-xl">
             Nenhum produto encontrado com os filtros selecionados.
           </div>
