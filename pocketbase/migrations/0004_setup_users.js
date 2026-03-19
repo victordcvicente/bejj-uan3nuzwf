@@ -34,6 +34,10 @@ migrate(
       users.fields.add(new TextField({ name: 'phone' }))
     }
 
+    if (!users.fields.getByName('name')) {
+      users.fields.add(new TextField({ name: 'name' }))
+    }
+
     // gymId Relation
     if (!users.fields.getByName('gymId')) {
       try {
@@ -50,11 +54,6 @@ migrate(
       }
     }
 
-    // Security policies
-    if (users.passwordAuth) {
-      users.passwordAuth.minPasswordLength = 8
-    }
-
     app.save(users)
 
     // Wipe previous admin to ensure a clean slate and correct config
@@ -66,7 +65,7 @@ migrate(
     // Reinstate Admin Root Account
     const admin = new Record(users)
     admin.setEmail('admin@bejj.com.br')
-    admin.setUsername('adminbejj')
+    admin.set('username', 'adminbejj')
     admin.setPassword('admin1234')
     admin.setVerified(true)
     admin.set('role', 'ADMIN')
@@ -75,6 +74,6 @@ migrate(
     app.save(admin)
   },
   (app) => {
-    // rollback (omitted intentionally for forward-only stability)
+    // no rollback required
   },
 )
