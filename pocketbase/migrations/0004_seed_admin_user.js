@@ -22,6 +22,17 @@ migrate(
       updated = true
     }
 
+    // Corrige regras antigas que possam conter a sintaxe defasada @request.data (PB < 0.23)
+    // Substituindo por @request.body para evitar o erro "invalid left operand"
+    if (users.createRule && users.createRule.includes('@request.data.')) {
+      users.createRule = users.createRule.replace(/@request\.data\./g, '@request.body.')
+      updated = true
+    }
+    if (users.updateRule && users.updateRule.includes('@request.data.')) {
+      users.updateRule = users.updateRule.replace(/@request\.data\./g, '@request.body.')
+      updated = true
+    }
+
     // Libera as regras de acesso para o ADMIN gerenciar os outros usuários
     if (users.listRule !== "id = @request.auth.id || @request.auth.role = 'ADMIN'") {
       users.listRule = "id = @request.auth.id || @request.auth.role = 'ADMIN'"
