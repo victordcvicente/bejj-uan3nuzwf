@@ -38,6 +38,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         role: 'STUDENT',
       })
       await pb.collection('users').authWithPassword(data.email, data.password)
+      setUser(pb.authStore.record)
       return { error: null }
     } catch (error) {
       return { error }
@@ -47,6 +48,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signIn = async (email: string, password: string) => {
     try {
       await pb.collection('users').authWithPassword(email, password)
+      setUser(pb.authStore.record)
       return { error: null }
     } catch (error) {
       return { error }
@@ -55,6 +57,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signOut = () => {
     pb.authStore.clear()
+    setUser(null)
   }
 
   return (

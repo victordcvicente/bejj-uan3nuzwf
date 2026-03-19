@@ -29,6 +29,7 @@ export default function Catalog() {
     return Array.from(cats).sort()
   }, [teamProductsList, products])
 
+  // Robust loading state avoids prematurely declaring 404
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-20 text-center">
@@ -42,7 +43,10 @@ export default function Catalog() {
     )
   }
 
-  if (!team) return <Navigate to="/404" />
+  // Graceful fallback if the team doesn't exist after loading completes
+  if (!isLoading && !team) {
+    return <Navigate to="/catalog" replace />
+  }
 
   let filteredProducts = teamProductsList
 
@@ -62,7 +66,7 @@ export default function Catalog() {
       <div className="flex flex-col md:flex-row gap-8 items-start md:items-center justify-between mb-8 pb-6 border-b">
         <div>
           <h1 className="text-3xl font-heading font-black uppercase">Catálogo</h1>
-          <p className="text-muted-foreground mt-1">{team.name} - Produtos Oficiais</p>
+          <p className="text-muted-foreground mt-1">{team!.name} - Produtos Oficiais</p>
         </div>
 
         <div className="flex flex-wrap gap-4 items-center w-full md:w-auto">
@@ -100,10 +104,10 @@ export default function Catalog() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {filteredProducts.map((tp) => {
           const product = products.find((p) => p.id === tp.productId)!
-          return <ProductCard key={tp.id} teamProduct={tp} product={product} team={team} />
+          return <ProductCard key={tp.id} teamProduct={tp} product={product} team={team!} />
         })}
         {filteredProducts.length === 0 && (
-          <div className="col-span-full py-20 text-center text-muted-foreground">
+          <div className="col-span-full py-20 text-center text-muted-foreground border-2 border-dashed rounded-xl">
             Nenhum produto encontrado com os filtros selecionados.
           </div>
         )}

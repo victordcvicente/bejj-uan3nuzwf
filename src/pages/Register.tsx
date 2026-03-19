@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '@/hooks/use-auth'
 import { useStore } from '@/store'
@@ -35,17 +35,24 @@ export default function Register() {
     gymId: '',
     professor: '',
   })
-  const [loading, setLoading] = useState(false)
-  const { signUp } = useAuth()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { signUp, user } = useAuth()
   const { teams, gyms } = useStore()
   const navigate = useNavigate()
   const { toast } = useToast()
+
+  // Guard to prevent logged in users from seeing the register form
+  useEffect(() => {
+    if (user) {
+      navigate('/', { replace: true })
+    }
+  }, [user, navigate])
 
   const filteredGyms = form.teamId ? gyms.filter((g) => g.teamId === form.teamId) : gyms
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
+    setIsSubmitting(true)
     const { error } = await signUp(form)
     if (error) {
       toast({
@@ -53,11 +60,11 @@ export default function Register() {
         description: getErrorMessage(error),
         variant: 'destructive',
       })
+      setIsSubmitting(false)
     } else {
       toast({ title: 'Conta criada com sucesso!' })
-      navigate('/')
+      // Let the useEffect handle the redirection when the user is populated
     }
-    setLoading(false)
   }
 
   return (
@@ -83,6 +90,7 @@ export default function Register() {
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 placeholder="Ex: João da Silva"
+                disabled={isSubmitting}
               />
             </div>
             <div className="space-y-2">
@@ -93,6 +101,7 @@ export default function Register() {
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 placeholder="seu@email.com"
+                disabled={isSubmitting}
               />
             </div>
             <div className="space-y-2">
@@ -104,6 +113,7 @@ export default function Register() {
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
                 placeholder="Mínimo 8 caracteres"
                 minLength={8}
+                disabled={isSubmitting}
               />
             </div>
             <div className="space-y-2">
@@ -113,6 +123,7 @@ export default function Register() {
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
                 placeholder="(00) 00000-0000"
+                disabled={isSubmitting}
               />
             </div>
             <div className="space-y-2">
@@ -122,12 +133,14 @@ export default function Register() {
                 value={form.cpf}
                 onChange={(e) => setForm({ ...form, cpf: e.target.value })}
                 placeholder="000.000.000-00"
+                disabled={isSubmitting}
               />
             </div>
             <div className="space-y-2">
               <Label>Equipe / Bandeira *</Label>
               <Select
                 required
+                disabled={isSubmitting}
                 value={form.teamId}
                 onValueChange={(v) => setForm({ ...form, teamId: v, gymId: '' })}
               >
@@ -147,7 +160,7 @@ export default function Register() {
               <Label>Academia (Unidade) *</Label>
               <Select
                 required
-                disabled={!form.teamId}
+                disabled={!form.teamId || isSubmitting}
                 value={form.gymId}
                 onValueChange={(v) => setForm({ ...form, gymId: v })}
               >
@@ -175,12 +188,17 @@ export default function Register() {
                 value={form.professor}
                 onChange={(e) => setForm({ ...form, professor: e.target.value })}
                 placeholder="Ex: Mestre Carlos"
+                disabled={isSubmitting}
               />
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4 mt-4">
-            <Button type="submit" className="w-full h-12 text-base font-bold" disabled={loading}>
-              {loading ? 'Criando conta...' : 'Finalizar Cadastro'}
+            <Button
+              type="submit"
+              className="w-full h-12 text-base font-bold"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Criando conta...' : 'Finalizar Cadastro'}
             </Button>
             <div className="text-sm text-center text-muted-foreground mt-2">
               Já possui uma conta?{' '}

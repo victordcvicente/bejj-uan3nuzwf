@@ -21,7 +21,7 @@ export default function TeamHome() {
   // Encontra a equipe pelo slug, senão redireciona para a home de catálogos globais
   const team = teams.find((t) => t.slug === teamSlug)
 
-  if (!team) {
+  if (!isLoading && !team) {
     return <Navigate to="/catalog" replace />
   }
 

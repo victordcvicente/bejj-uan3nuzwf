@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '@/hooks/use-auth'
 import { Button } from '@/components/ui/button'
@@ -19,14 +19,25 @@ import logoUrl from '@/assets/image-6d323.png'
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-  const { signIn } = useAuth()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { signIn, user } = useAuth()
   const navigate = useNavigate()
   const { toast } = useToast()
 
+  // Intelligent redirection flow based on user role
+  useEffect(() => {
+    if (user) {
+      const role = user.role
+      if (role === 'ADMIN') navigate('/admin', { replace: true })
+      else if (role === 'PRODUCTION') navigate('/production', { replace: true })
+      else if (role === 'PROFESSOR') navigate('/professor', { replace: true })
+      else navigate('/', { replace: true })
+    }
+  }, [user, navigate])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
+    setIsSubmitting(true)
     const { error } = await signIn(email, password)
     if (error) {
       toast({
@@ -34,11 +45,11 @@ export default function Login() {
         description: getErrorMessage(error),
         variant: 'destructive',
       })
+      setIsSubmitting(false)
     } else {
       toast({ title: 'Bem-vindo de volta!' })
-      navigate('/')
+      // Notice: Redirection is handled automatically by the useEffect
     }
-    setLoading(false)
   }
 
   return (
@@ -61,6 +72,7 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="seu@email.com"
+                disabled={isSubmitting}
               />
             </div>
             <div className="space-y-2">
@@ -72,12 +84,17 @@ export default function Login() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 minLength={8}
+                disabled={isSubmitting}
               />
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4 mt-4">
-            <Button type="submit" className="w-full h-12 text-base font-bold" disabled={loading}>
-              {loading ? 'Entrando...' : 'Entrar'}
+            <Button
+              type="submit"
+              className="w-full h-12 text-base font-bold"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Entrando...' : 'Entrar'}
             </Button>
             <div className="text-sm text-center text-muted-foreground mt-2">
               Ainda não tem conta?{' '}
