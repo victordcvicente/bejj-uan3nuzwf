@@ -1,5 +1,5 @@
 import { useParams, Navigate } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useStore } from '../store'
 import ProductCard from '../components/ProductCard'
 import { Button } from '../components/ui/button'
@@ -13,11 +13,22 @@ export default function Catalog() {
   const [inStockOnly, setInStockOnly] = useState(false)
 
   const team = teams.find((t) => t.slug === teamSlug)
+
   if (!team) return <Navigate to="/404" />
 
-  const categories = ['Kimono', 'Casual', 'Accessories']
+  const teamProductsList = teamProducts.filter((tp) => tp.teamId === team.id)
 
-  let filteredProducts = teamProducts.filter((tp) => tp.teamId === team.id)
+  // Dynamically extract categories available for this specific team
+  const availableCategories = useMemo(() => {
+    const cats = new Set<string>()
+    teamProductsList.forEach((tp) => {
+      const p = products.find((prod) => prod.id === tp.productId)
+      if (p) cats.add(p.category)
+    })
+    return Array.from(cats).sort()
+  }, [teamProductsList, products])
+
+  let filteredProducts = teamProductsList
 
   if (filterCategory) {
     filteredProducts = filteredProducts.filter((tp) => {
@@ -46,7 +57,7 @@ export default function Catalog() {
             </Label>
           </div>
 
-          <div className="flex gap-2 bg-muted p-1 rounded-lg">
+          <div className="flex flex-wrap gap-2 bg-muted p-1 rounded-lg overflow-x-auto">
             <Button
               variant={filterCategory === null ? 'default' : 'ghost'}
               size="sm"
@@ -55,7 +66,7 @@ export default function Catalog() {
             >
               Todos
             </Button>
-            {categories.map((cat) => (
+            {availableCategories.map((cat) => (
               <Button
                 key={cat}
                 variant={filterCategory === cat ? 'default' : 'ghost'}

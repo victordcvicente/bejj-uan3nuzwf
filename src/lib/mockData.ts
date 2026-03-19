@@ -3,88 +3,181 @@ import { Team, Product, TeamProduct, Order } from '../types'
 export const MOCK_TEAMS: Team[] = [
   {
     id: 't1',
-    slug: 'alpha-jj',
-    name: 'Alpha Jiu-Jitsu',
-    logo: 'https://img.usecurling.com/i?q=shield&color=black&shape=fill',
-    primaryColor: 'bg-blue-800',
-    coverImage: 'https://img.usecurling.com/p/800/400?q=jiu%20jitsu%20gym',
+    slug: 'bejj-official',
+    name: 'BEJJ Official',
+    logo: 'https://img.usecurling.com/i?q=letter%20b&color=black&shape=fill',
+    primaryColor: 'bg-zinc-900',
+    coverImage: 'https://img.usecurling.com/p/1200/400?q=jiu%20jitsu%20training&color=black',
   },
   {
     id: 't2',
+    slug: 'alpha-jj',
+    name: 'Alpha Jiu-Jitsu',
+    logo: 'https://img.usecurling.com/i?q=shield&color=blue&shape=fill',
+    primaryColor: 'bg-blue-800',
+    coverImage: 'https://img.usecurling.com/p/1200/400?q=bjj%20gym&color=blue',
+  },
+  {
+    id: 't3',
     slug: 'bravo-team',
     name: 'Bravo Team',
     logo: 'https://img.usecurling.com/i?q=lion&color=orange&shape=outline',
     primaryColor: 'bg-amber-600',
-    coverImage: 'https://img.usecurling.com/p/800/400?q=martial%20arts%20training',
+    coverImage: 'https://img.usecurling.com/p/1200/400?q=martial%20arts&color=orange',
   },
 ]
 
 export const MOCK_PRODUCTS: Product[] = [
   {
     id: 'p1',
-    name: 'Kimono Competidor Pro',
-    description: 'Kimono de alta performance, trançado super resistente e modelagem fit.',
+    name: 'Kimono BEJJ Pro Series',
+    description:
+      'Kimono de alta performance, trançado super resistente (450 GSM) e modelagem fit. Ideal para competições e treinos intensos.',
     images: [
-      'https://img.usecurling.com/p/400/500?q=white%20kimono',
-      'https://img.usecurling.com/p/400/500?q=bjj%20kimono',
+      'https://img.usecurling.com/p/600/800?q=white%20kimono',
+      'https://img.usecurling.com/p/600/800?q=bjj%20gi',
     ],
     category: 'Kimono',
   },
   {
     id: 'p2',
-    name: 'Rashguard No-Gi Elite',
-    description: 'Rashguard com tecnologia de compressão e controle térmico.',
-    images: ['https://img.usecurling.com/p/400/500?q=rashguard%20shirt'],
-    category: 'Casual',
+    name: 'Kimono BEJJ Light',
+    description:
+      'Leve e confortável, trançado de 350 GSM. Perfeito para bater o peso e treinos em dias quentes.',
+    images: ['https://img.usecurling.com/p/600/800?q=blue%20kimono'],
+    category: 'Kimono',
   },
   {
     id: 'p3',
-    name: 'Faixa Premium',
-    description: 'Faixa com 6 costuras, super grossa e durável.',
-    images: ['https://img.usecurling.com/p/400/500?q=martial%20arts%20belt'],
-    category: 'Accessories',
+    name: 'Rashguard BEJJ Elite No-Gi',
+    description:
+      'Rashguard com tecnologia de compressão, proteção UV e controle térmico. Estampa sublimada de alta durabilidade.',
+    images: ['https://img.usecurling.com/p/600/800?q=rashguard%20shirt'],
+    category: 'No-Gi',
+  },
+  {
+    id: 'p4',
+    name: 'Bermuda de Combate BEJJ',
+    description: 'Bermuda leve com tecido flexível entre as pernas para máxima mobilidade.',
+    images: ['https://img.usecurling.com/p/600/800?q=mma%20shorts'],
+    category: 'No-Gi',
+  },
+  {
+    id: 'p5',
+    name: 'Camiseta BEJJ Lifestyle',
+    description: 'Algodão premium penteado. Conforto e estilo para o dia a dia.',
+    images: ['https://img.usecurling.com/p/600/800?q=black%20tshirt'],
+    category: 'Casual',
+  },
+  {
+    id: 'p6',
+    name: 'Moletom BEJJ Essential',
+    description: 'Moletom canguru peluciado por dentro, com capuz e bolso frontal.',
+    images: ['https://img.usecurling.com/p/600/800?q=hoodie'],
+    category: 'Casual',
+  },
+  {
+    id: 'p7',
+    name: 'Faixa Premium BEJJ',
+    description:
+      'Faixa com 6 costuras reforçadas, super grossa e com ponta preta/vermelha para graus.',
+    images: ['https://img.usecurling.com/p/600/800?q=martial%20arts%20belt'],
+    category: 'Acessórios',
+  },
+  {
+    id: 'p8',
+    name: 'Mochila Transversal BEJJ',
+    description:
+      'Mochila prática para levar o kimono e acessórios de treino. Material impermeável.',
+    images: ['https://img.usecurling.com/p/600/800?q=sports%20backpack'],
+    category: 'Acessórios',
   },
 ]
 
 export const MOCK_TEAM_PRODUCTS: TeamProduct[] = [
-  {
-    id: 'tp1',
+  // BEJJ Official Catalog (All products, base prices)
+  ...MOCK_PRODUCTS.map((p, index) => ({
+    id: `tp_bejj_${index}`,
     teamId: 't1',
+    productId: p.id,
+    price:
+      p.category === 'Kimono'
+        ? 589.9
+        : p.category === 'No-Gi'
+          ? 149.9
+          : p.category === 'Casual'
+            ? 119.9
+            : 89.9,
+    sizes: p.category === 'Kimono' ? ['A0', 'A1', 'A2', 'A3', 'A4'] : ['P', 'M', 'G', 'GG', 'XG'],
+    colors: ['Preto', 'Branco', 'Azul'],
+    inStock: true,
+    customizationFields:
+      p.category === 'Kimono'
+        ? [{ id: 'c1', name: 'Nome Bordado', type: 'text' as const, price: 45.0 }]
+        : [],
+  })),
+
+  // Alpha JJ Catalog (Selected products, custom pricing/patches)
+  {
+    id: 'tp_alpha_1',
+    teamId: 't2',
     productId: 'p1',
-    price: 450.0,
-    sizes: ['A0', 'A1', 'A2', 'A3', 'A4'],
-    colors: ['Branco', 'Azul', 'Preto'],
+    price: 620.0,
+    sizes: ['A1', 'A2', 'A3'],
+    colors: ['Branco', 'Azul'],
     inStock: true,
     customizationFields: [
-      { id: 'c1', name: 'Nome Bordado', type: 'text', price: 30.0 },
+      { id: 'c1', name: 'Nome Bordado', type: 'text', price: 40.0 },
       {
         id: 'c2',
-        name: 'Posição Patch',
+        name: 'Patch da Equipe',
         type: 'select',
-        options: ['Peito', 'Costas', 'Perna'],
+        options: ['Peito', 'Costas', 'Ambos'],
         price: 0,
       },
     ],
   },
   {
-    id: 'tp2',
-    teamId: 't1',
-    productId: 'p2',
-    price: 120.0,
-    sizes: ['P', 'M', 'G', 'GG'],
+    id: 'tp_alpha_2',
+    teamId: 't2',
+    productId: 'p3',
+    price: 160.0,
+    sizes: ['P', 'M', 'G'],
     colors: ['Preto'],
     inStock: true,
     customizationFields: [],
   },
   {
-    id: 'tp3',
+    id: 'tp_alpha_3',
     teamId: 't2',
-    productId: 'p1',
-    price: 480.0, // Different price for Bravo Team
-    sizes: ['A1', 'A2', 'A3'],
+    productId: 'p7',
+    price: 95.0,
+    sizes: ['A1', 'A2', 'A3', 'A4'],
+    colors: ['Branco', 'Azul', 'Roxa', 'Marrom', 'Preta'],
+    inStock: true,
+    customizationFields: [],
+  },
+
+  // Bravo Team Catalog
+  {
+    id: 'tp_bravo_1',
+    teamId: 't3',
+    productId: 'p2',
+    price: 499.9,
+    sizes: ['A0', 'A1', 'A2', 'A3'],
     colors: ['Branco', 'Preto'],
     inStock: true,
-    customizationFields: [{ id: 'c1', name: 'Nome Bordado', type: 'text', price: 40.0 }],
+    customizationFields: [{ id: 'c1', name: 'Nome Bordado', type: 'text', price: 35.0 }],
+  },
+  {
+    id: 'tp_bravo_2',
+    teamId: 't3',
+    productId: 'p5',
+    price: 89.9,
+    sizes: ['P', 'M', 'G', 'GG'],
+    colors: ['Preto', 'Cinza'],
+    inStock: false,
+    customizationFields: [],
   },
 ]
 
@@ -97,10 +190,10 @@ export const MOCK_ORDERS: Order[] = [
     items: [
       {
         id: 'i1',
-        teamProductId: 'tp1',
-        productName: 'Kimono Competidor Pro',
-        teamName: 'Alpha Jiu-Jitsu',
-        price: 480.0,
+        teamProductId: 'tp_bejj_0',
+        productName: 'Kimono BEJJ Pro Series',
+        teamName: 'BEJJ Official',
+        price: 589.9,
         quantity: 1,
         size: 'A2',
         color: 'Branco',
@@ -108,7 +201,7 @@ export const MOCK_ORDERS: Order[] = [
         image: 'https://img.usecurling.com/p/400/500?q=white%20kimono',
       },
     ],
-    total: 480.0,
+    total: 634.9,
     paymentStatus: 'PAID',
     productionStatus: 'PRODUCTION',
     createdAt: new Date(Date.now() - 86400000).toISOString(),

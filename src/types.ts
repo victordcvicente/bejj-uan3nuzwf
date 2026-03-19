@@ -12,7 +12,7 @@ export type Product = {
   name: string
   description: string
   images: string[]
-  category: 'Kimono' | 'Casual' | 'Accessories'
+  category: string
 }
 
 export type CustomizationField = {

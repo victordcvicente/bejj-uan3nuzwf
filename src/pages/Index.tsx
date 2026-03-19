@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, ChevronRight } from 'lucide-react'
+import { Search, ChevronRight, CheckCircle2 } from 'lucide-react'
 import { useStore } from '../store'
 import { Input } from '../components/ui/input'
 import { Button } from '../components/ui/button'
@@ -24,20 +24,20 @@ export default function Index() {
         </div>
         <div className="relative z-10 max-w-3xl animate-fade-in-up">
           <Badge className="mb-4 bg-accent text-accent-foreground hover:bg-accent/90">
-            B2B2C Platform
+            <CheckCircle2 className="w-3 h-3 mr-1 inline" /> Catálogo Atualizado
           </Badge>
           <h1 className="text-4xl md:text-6xl font-heading font-black mb-6 uppercase tracking-tight">
             Seu Lifestyle, <br className="hidden md:inline" />
             Sua Equipe.
           </h1>
           <p className="text-lg md:text-xl text-muted/80 mb-8 max-w-2xl mx-auto">
-            Encontre sua academia e tenha acesso exclusivo ao catálogo de produtos oficiais, kimonos
+            Acesse o catálogo atualizado da sua academia com produtos oficiais, kimonos
             personalizados e muito mais.
           </p>
           <div className="relative max-w-lg mx-auto w-full group">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" />
             <Input
-              className="w-full pl-12 h-14 text-lg rounded-full bg-background text-foreground border-none ring-4 ring-transparent focus-visible:ring-accent/50"
+              className="w-full pl-12 h-14 text-lg rounded-full bg-background text-foreground border-none ring-4 ring-transparent focus-visible:ring-accent/50 shadow-lg"
               placeholder="Digite o nome da sua equipe..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -49,7 +49,7 @@ export default function Index() {
       <section className="container mx-auto px-4 py-16 w-full max-w-5xl">
         <h2 className="font-heading font-bold text-2xl mb-8 flex items-center gap-2">
           <span className="w-2 h-8 bg-accent block rounded-sm"></span>
-          {search ? 'Resultados da Busca' : 'Equipes em Destaque'}
+          {search ? 'Resultados da Busca' : 'Equipes Disponíveis'}
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -81,7 +81,9 @@ export default function Index() {
                   {team.name}
                 </h3>
                 <div className="flex items-center justify-between mt-4">
-                  <span className="text-sm text-muted-foreground">Acessar Portal</span>
+                  <span className="text-sm text-muted-foreground font-medium">
+                    Acessar Catálogo
+                  </span>
                   <Button
                     variant="ghost"
                     size="icon"
@@ -107,7 +109,7 @@ export default function Index() {
 function Badge({ children, className }: any) {
   return (
     <span
-      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${className}`}
+      className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold shadow-sm ${className}`}
     >
       {children}
     </span>
