@@ -1,33 +1,38 @@
 import { Link } from 'react-router-dom'
+import logoUrl from '@/assets/image-6d323.png'
 
-export default function Footer() {
+export function Footer() {
   return (
-    <footer className="border-t bg-muted/30 pt-12 pb-8 mt-auto">
-      <div className="container mx-auto px-4 text-center sm:text-left flex flex-col sm:flex-row justify-between items-center gap-6">
-        <div>
-          <div className="font-heading font-black text-xl mb-2">BJJ LIFESTYLE CO.</div>
-          <p className="text-sm text-muted-foreground max-w-sm">
-            Plataforma premium de produtos personalizados para as melhores equipes de Jiu-Jitsu do
-            mundo.
+    <footer className="w-full border-t bg-background mt-auto">
+      <div className="container flex flex-col items-center justify-between gap-4 py-8 md:h-20 md:flex-row md:py-0">
+        <div className="flex flex-col items-center gap-3 md:flex-row md:gap-4 px-8 md:px-0">
+          <Link to="/" className="flex items-center gap-2">
+            <img
+              src={logoUrl}
+              alt="BEJJ Logo"
+              className="h-6 w-auto rounded-sm object-contain grayscale opacity-70 hover:opacity-100 hover:grayscale-0 transition-all"
+            />
+            <span className="font-semibold text-sm text-muted-foreground">PORTAL BEJJ</span>
+          </Link>
+          <span className="hidden md:inline-block text-muted-foreground/30">|</span>
+          <p className="text-center text-sm text-muted-foreground md:text-left">
+            &copy; {new Date().getFullYear()} Todos os direitos reservados.
           </p>
         </div>
-        <div className="flex gap-4 text-sm text-muted-foreground font-medium">
-          <a href="#" className="hover:text-foreground">
-            Instagram
-          </a>
-          <a href="#" className="hover:text-foreground">
-            WhatsApp
-          </a>
-          <Link to="/admin" className="hover:text-foreground">
-            Admin
+        <div className="flex gap-6 px-8 md:px-0">
+          <Link
+            to="#"
+            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Termos de Uso
+          </Link>
+          <Link
+            to="#"
+            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Privacidade
           </Link>
         </div>
-      </div>
-      <div className="container mx-auto px-4 mt-8 pt-8 border-t text-xs text-muted-foreground text-center flex flex-col sm:flex-row justify-between">
-        <span>
-          &copy; {new Date().getFullYear()} BJJ Lifestyle Co. Todos os direitos reservados.
-        </span>
-        <span className="mt-2 sm:mt-0">Powered by Skip</span>
       </div>
     </footer>
   )

@@ -1,64 +1,58 @@
 import { Link, useLocation } from 'react-router-dom'
-import { LayoutDashboard, Users, Package, Settings, ClipboardList, Activity } from 'lucide-react'
-import { cn } from '../lib/utils'
+import { cn } from '@/lib/utils'
+import { LayoutDashboard, ShoppingBag, Users, Settings, Package, Truck, LogOut } from 'lucide-react'
+import logoUrl from '@/assets/image-6d323.png'
 
-export default function SidebarNav() {
+const adminLinks = [
+  { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+  { name: 'Pedidos', href: '/admin/orders', icon: ShoppingBag },
+  { name: 'Equipes / Academias', href: '/admin/teams', icon: Users },
+  { name: 'Catálogo', href: '/admin/catalog', icon: Package },
+  { name: 'Produção', href: '/production', icon: Truck },
+]
+
+export function SidebarNav() {
   const location = useLocation()
 
-  const getNavItems = () => {
-    if (location.pathname.startsWith('/admin')) {
-      return [
-        { name: 'Dashboard', path: '/admin', icon: LayoutDashboard },
-        { name: 'Equipes', path: '/admin/teams', icon: Users },
-        { name: 'Produtos', path: '/admin/products', icon: Package },
-        { name: 'Configurações', path: '/admin/settings', icon: Settings },
-      ]
-    }
-    if (location.pathname.startsWith('/production')) {
-      return [{ name: 'Fila de Produção', path: '/production', icon: ClipboardList }]
-    }
-    if (location.pathname.startsWith('/professor')) {
-      return [
-        { name: 'Visão Geral', path: '/professor', icon: Activity },
-        { name: 'Meus Alunos', path: '/professor/students', icon: Users },
-      ]
-    }
-    return []
-  }
-
-  const items = getNavItems()
-  const role = location.pathname.split('/')[1].toUpperCase()
-
   return (
-    <aside className="w-64 border-r bg-background flex-shrink-0 hidden md:flex flex-col">
-      <div className="h-16 flex items-center px-6 border-b font-heading font-black">
-        PORTAL {role}
-      </div>
-      <nav className="flex-1 p-4 space-y-2">
-        {items.map((item) => (
-          <Link
-            key={item.path}
-            to={item.path}
-            className={cn(
-              'flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors',
-              location.pathname === item.path
-                ? 'bg-primary text-primary-foreground'
-                : 'hover:bg-muted text-muted-foreground hover:text-foreground',
-            )}
-          >
-            <item.icon className="h-4 w-4" />
-            {item.name}
-          </Link>
-        ))}
-      </nav>
-      <div className="p-4 border-t">
-        <Link
-          to="/"
-          className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-2"
-        >
-          &larr; Voltar ao site
+    <div className="flex h-full flex-col border-r bg-card">
+      <div className="p-6">
+        <Link to="/" className="flex items-center gap-3 transition-opacity hover:opacity-80">
+          <img src={logoUrl} alt="BEJJ Logo" className="h-8 w-auto rounded-sm object-contain" />
+          <span className="font-bold text-lg tracking-tight">PORTAL BEJJ</span>
         </Link>
       </div>
-    </aside>
+      <div className="flex-1 overflow-auto py-2">
+        <nav className="grid items-start px-4 text-sm font-medium gap-1">
+          {adminLinks.map((link) => {
+            const Icon = link.icon
+            const isActive =
+              location.pathname === link.href || location.pathname.startsWith(`${link.href}/`)
+            return (
+              <Link
+                key={link.href}
+                to={link.href}
+                className={cn(
+                  'flex items-center gap-3 rounded-lg px-3 py-2.5 text-muted-foreground transition-all hover:text-foreground hover:bg-muted',
+                  isActive ? 'bg-secondary text-foreground font-medium' : '',
+                )}
+              >
+                <Icon className={cn('h-4 w-4', isActive ? 'text-primary' : '')} />
+                {link.name}
+              </Link>
+            )
+          })}
+        </nav>
+      </div>
+      <div className="p-4 mt-auto">
+        <Link
+          to="/"
+          className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-muted-foreground transition-all hover:text-destructive hover:bg-destructive/10"
+        >
+          <LogOut className="h-4 w-4" />
+          Sair do Painel
+        </Link>
+      </div>
+    </div>
   )
 }

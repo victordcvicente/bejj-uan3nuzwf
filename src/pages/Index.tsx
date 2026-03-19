@@ -1,117 +1,105 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Search, ChevronRight, CheckCircle2 } from 'lucide-react'
-import { useStore } from '../store'
-import { Input } from '../components/ui/input'
-import { Button } from '../components/ui/button'
+import { Link } from 'react-router-dom'
+import { Button } from '@/components/ui/button'
+import { ArrowRight, ShoppingBag, ShieldCheck, Clock, Medal } from 'lucide-react'
+import logoUrl from '@/assets/image-6d323.png'
 
 export default function Index() {
-  const { teams } = useStore()
-  const [search, setSearch] = useState('')
-  const navigate = useNavigate()
-
-  const filteredTeams = teams.filter((t) => t.name.toLowerCase().includes(search.toLowerCase()))
-
   return (
-    <div className="min-h-[calc(100vh-16rem)] flex flex-col items-center">
-      <section className="w-full bg-primary text-primary-foreground py-20 relative overflow-hidden flex flex-col items-center text-center px-4">
-        <div className="absolute inset-0 opacity-20 pointer-events-none">
-          <img
-            src="https://img.usecurling.com/p/1920/1080?q=jiu%20jitsu%20combat&color=black"
-            alt="Background"
-            className="w-full h-full object-cover"
-          />
-        </div>
-        <div className="relative z-10 max-w-3xl animate-fade-in-up">
-          <Badge className="mb-4 bg-accent text-accent-foreground hover:bg-accent/90">
-            <CheckCircle2 className="w-3 h-3 mr-1 inline" /> Catálogo Atualizado
-          </Badge>
-          <h1 className="text-4xl md:text-6xl font-heading font-black mb-6 uppercase tracking-tight">
-            Seu Lifestyle, <br className="hidden md:inline" />
-            Sua Equipe.
-          </h1>
-          <p className="text-lg md:text-xl text-muted/80 mb-8 max-w-2xl mx-auto">
-            Acesse o catálogo atualizado da sua academia com produtos oficiais, kimonos
-            personalizados e muito mais.
-          </p>
-          <div className="relative max-w-lg mx-auto w-full group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" />
-            <Input
-              className="w-full pl-12 h-14 text-lg rounded-full bg-background text-foreground border-none ring-4 ring-transparent focus-visible:ring-accent/50 shadow-lg"
-              placeholder="Digite o nome da sua equipe..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+    <div className="flex flex-col min-h-[calc(100vh-4rem)]">
+      <main className="flex-1">
+        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-40 bg-muted/40 relative overflow-hidden">
+          <div className="absolute inset-0 bg-grid-black/[0.02] bg-[size:20px_20px]" />
+          <div className="container px-4 md:px-6 relative">
+            <div className="flex flex-col items-center space-y-8 text-center">
+              <div className="inline-flex items-center justify-center p-3 bg-background rounded-3xl shadow-sm border mb-2">
+                <img src={logoUrl} alt="BEJJ Logo" className="h-24 w-auto object-contain" />
+              </div>
+              <div className="space-y-4 max-w-3xl">
+                <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+                  Bem-vindo ao <span className="text-primary">PORTAL BEJJ</span>
+                </h1>
+                <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl leading-relaxed">
+                  A plataforma exclusiva para pedidos de produtos personalizados. Vista a armadura
+                  da sua equipe com qualidade premium e design impecável.
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto pt-4">
+                <Button asChild size="lg" className="h-12 px-8 text-base font-semibold">
+                  <Link to="/catalog">
+                    Acessar Catálogo <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="h-12 px-8 text-base bg-background"
+                  asChild
+                >
+                  <Link to="/tracking">Acompanhar Pedido</Link>
+                </Button>
+              </div>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section className="container mx-auto px-4 py-16 w-full max-w-5xl">
-        <h2 className="font-heading font-bold text-2xl mb-8 flex items-center gap-2">
-          <span className="w-2 h-8 bg-accent block rounded-sm"></span>
-          {search ? 'Resultados da Busca' : 'Equipes Disponíveis'}
-        </h2>
+        <section className="w-full py-16 md:py-24 lg:py-32 bg-background border-t">
+          <div className="container px-4 md:px-6">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4">
+                Como funciona o PORTAL BEJJ
+              </h2>
+              <p className="text-muted-foreground md:text-lg max-w-[800px] mx-auto">
+                Desenvolvemos um processo simples e direto para que você possa focar no que
+                realmente importa: seus treinos no tatame.
+              </p>
+            </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredTeams.map((team) => (
-            <div
-              key={team.id}
-              onClick={() => navigate(`/${team.slug}`)}
-              className="group cursor-pointer rounded-xl border bg-card overflow-hidden hover:shadow-elevation transition-all hover:-translate-y-1"
-            >
-              <div className="h-32 bg-muted relative">
-                <img
-                  src={team.coverImage}
-                  alt="Cover"
-                  className="w-full h-full object-cover opacity-80"
-                />
-                <div
-                  className={`absolute inset-0 opacity-40 mix-blend-multiply ${team.primaryColor}`}
-                ></div>
+            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="flex flex-col items-center space-y-4 text-center p-6 rounded-2xl bg-muted/30 transition-colors hover:bg-muted/50">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <Medal className="h-8 w-8" />
+                </div>
+                <h3 className="text-xl font-bold">1. Escolha sua Academia</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Selecione sua unidade e acesse os produtos exclusivos desenvolvidos para sua
+                  equipe.
+                </p>
               </div>
-              <div className="p-6 relative">
-                <div className="w-16 h-16 bg-white rounded-full p-2 shadow-md absolute -top-8 left-6 flex items-center justify-center border">
-                  <img
-                    src={team.logo}
-                    alt={team.name}
-                    className="max-w-full max-h-full object-contain"
-                  />
+
+              <div className="flex flex-col items-center space-y-4 text-center p-6 rounded-2xl bg-muted/30 transition-colors hover:bg-muted/50">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <ShoppingBag className="h-8 w-8" />
                 </div>
-                <h3 className="font-bold text-xl mt-6 group-hover:text-accent transition-colors">
-                  {team.name}
-                </h3>
-                <div className="flex items-center justify-between mt-4">
-                  <span className="text-sm text-muted-foreground font-medium">
-                    Acessar Catálogo
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="group-hover:bg-accent/10 group-hover:text-accent rounded-full"
-                  >
-                    <ChevronRight className="h-5 w-5" />
-                  </Button>
+                <h3 className="text-xl font-bold">2. Personalize</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Escolha tamanhos, cores e adicione seu nome ou graduação nos produtos permitidos.
+                </p>
+              </div>
+
+              <div className="flex flex-col items-center space-y-4 text-center p-6 rounded-2xl bg-muted/30 transition-colors hover:bg-muted/50">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <ShieldCheck className="h-8 w-8" />
                 </div>
+                <h3 className="text-xl font-bold">3. Pagamento via PIX</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Processo rápido e seguro com anexo de comprovante para rápida liberação do pedido.
+                </p>
+              </div>
+
+              <div className="flex flex-col items-center space-y-4 text-center p-6 rounded-2xl bg-muted/30 transition-colors hover:bg-muted/50">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <Clock className="h-8 w-8" />
+                </div>
+                <h3 className="text-xl font-bold">4. Receba no Tatame</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Acompanhe a produção em tempo real e receba seus produtos diretamente na sua
+                  academia.
+                </p>
               </div>
             </div>
-          ))}
-          {filteredTeams.length === 0 && (
-            <div className="col-span-full text-center py-12 text-muted-foreground">
-              Nenhuma equipe encontrada com esse nome.
-            </div>
-          )}
-        </div>
-      </section>
+          </div>
+        </section>
+      </main>
     </div>
-  )
-}
-
-function Badge({ children, className }: any) {
-  return (
-    <span
-      className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold shadow-sm ${className}`}
-    >
-      {children}
-    </span>
   )
 }
