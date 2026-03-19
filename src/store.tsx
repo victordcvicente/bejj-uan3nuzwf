@@ -21,41 +21,63 @@ interface StoreContextType {
   addOrder: (order: Order) => void
   updateOrderStatus: (orderId: string, status: Order['productionStatus']) => void
   updatePaymentStatus: (orderId: string, status: Order['paymentStatus']) => void
+
+  addProduct: (product: Product) => void
+  updateProduct: (id: string, product: Partial<Product>) => void
+  deleteProduct: (id: string) => void
+
+  addTeam: (team: Team) => void
+  updateTeam: (id: string, team: Partial<Team>) => void
+  deleteTeam: (id: string) => void
+
+  addGym: (gym: Gym) => void
+  updateGym: (id: string, gym: Partial<Gym>) => void
+  deleteGym: (id: string) => void
+
+  addTeamProduct: (tp: TeamProduct) => void
+  updateTeamProduct: (id: string, tp: Partial<TeamProduct>) => void
+  deleteTeamProduct: (id: string) => void
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined)
 
 export function StoreProvider({ children }: { children: ReactNode }) {
-  const [teams] = useState<Team[]>(MOCK_TEAMS)
-  const [gyms] = useState<Gym[]>(MOCK_GYMS)
-  const [products] = useState<Product[]>(MOCK_PRODUCTS)
-  const [teamProducts] = useState<TeamProduct[]>(MOCK_TEAM_PRODUCTS)
+  const [teams, setTeams] = useState<Team[]>(MOCK_TEAMS)
+  const [gyms, setGyms] = useState<Gym[]>(MOCK_GYMS)
+  const [products, setProducts] = useState<Product[]>(MOCK_PRODUCTS)
+  const [teamProducts, setTeamProducts] = useState<TeamProduct[]>(MOCK_TEAM_PRODUCTS)
   const [orders, setOrders] = useState<Order[]>(MOCK_ORDERS)
   const [cart, setCart] = useState<CartItem[]>([])
 
-  const addToCart = (item: CartItem) => {
-    setCart((prev) => [...prev, item])
-  }
-
-  const removeFromCart = (id: string) => {
-    setCart((prev) => prev.filter((i) => i.id !== id))
-  }
-
+  const addToCart = (item: CartItem) => setCart((prev) => [...prev, item])
+  const removeFromCart = (id: string) => setCart((prev) => prev.filter((i) => i.id !== id))
   const clearCart = () => setCart([])
+  const addOrder = (order: Order) => setOrders((prev) => [order, ...prev])
+  const updateOrderStatus = (id: string, status: Order['productionStatus']) =>
+    setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, productionStatus: status } : o)))
+  const updatePaymentStatus = (id: string, status: Order['paymentStatus']) =>
+    setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, paymentStatus: status } : o)))
 
-  const addOrder = (order: Order) => {
-    setOrders((prev) => [order, ...prev])
-  }
+  const addProduct = (p: Product) => setProducts((prev) => [...prev, p])
+  const updateProduct = (id: string, p: Partial<Product>) =>
+    setProducts((prev) => prev.map((x) => (x.id === id ? { ...x, ...p } : x)))
+  const deleteProduct = (id: string) => setProducts((prev) => prev.filter((x) => x.id !== id))
 
-  const updateOrderStatus = (orderId: string, status: Order['productionStatus']) => {
-    setOrders((prev) =>
-      prev.map((o) => (o.id === orderId ? { ...o, productionStatus: status } : o)),
-    )
-  }
+  const addTeam = (t: Team) => setTeams((prev) => [...prev, t])
+  const updateTeam = (id: string, t: Partial<Team>) =>
+    setTeams((prev) => prev.map((x) => (x.id === id ? { ...x, ...t } : x)))
+  const deleteTeam = (id: string) => setTeams((prev) => prev.filter((x) => x.id !== id))
 
-  const updatePaymentStatus = (orderId: string, status: Order['paymentStatus']) => {
-    setOrders((prev) => prev.map((o) => (o.id === orderId ? { ...o, paymentStatus: status } : o)))
-  }
+  const addGym = (g: Gym) => setGyms((prev) => [...prev, g])
+  const updateGym = (id: string, g: Partial<Gym>) =>
+    setGyms((prev) => prev.map((x) => (x.id === id ? { ...x, ...g } : x)))
+  const deleteGym = (id: string) => setGyms((prev) => prev.filter((x) => x.id !== id))
+
+  const addTeamProduct = (tp: TeamProduct) => setTeamProducts((prev) => [...prev, tp])
+  const updateTeamProduct = (id: string, tp: Partial<TeamProduct>) =>
+    setTeamProducts((prev) => prev.map((x) => (x.id === id ? { ...x, ...tp } : x)))
+  const deleteTeamProduct = (id: string) =>
+    setTeamProducts((prev) => prev.filter((x) => x.id !== id))
 
   return (
     <StoreContext.Provider
@@ -72,6 +94,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         addOrder,
         updateOrderStatus,
         updatePaymentStatus,
+        addProduct,
+        updateProduct,
+        deleteProduct,
+        addTeam,
+        updateTeam,
+        deleteTeam,
+        addGym,
+        updateGym,
+        deleteGym,
+        addTeamProduct,
+        updateTeamProduct,
+        deleteTeamProduct,
       }}
     >
       {children}
