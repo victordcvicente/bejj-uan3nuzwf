@@ -6,6 +6,7 @@ import { useRealtime } from '@/hooks/use-realtime'
 interface StoreContextType {
   role: Role
   setRole: (role: Role) => void
+  isLoading: boolean
   teams: Team[]
   gyms: Gym[]
   products: Product[]
@@ -47,6 +48,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   })
 
+  const [isLoading, setIsLoading] = useState(true)
   const [teams, setTeams] = useState<Team[]>([])
   const [gyms, setGyms] = useState<Gym[]>([])
   const [products, setProducts] = useState<Product[]>([])
@@ -71,6 +73,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const loadData = async () => {
     try {
+      setIsLoading(true)
       const [t, g, p, tp, o] = await Promise.all([
         pb.collection('teams').getFullList(),
         pb.collection('gyms').getFullList(),
@@ -85,6 +88,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setOrders(o as any)
     } catch (error) {
       console.error('Error loading data:', error)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -168,6 +173,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       value={{
         role,
         setRole,
+        isLoading,
         teams,
         gyms,
         products,

@@ -25,7 +25,7 @@ import { CustomizationField } from '../types'
 export default function ProductDetail() {
   const { teamSlug, productId } = useParams()
   const navigate = useNavigate()
-  const { teams, teamProducts, products, addToCart } = useStore()
+  const { teams, teamProducts, products, addToCart, isLoading } = useStore()
   const { toast } = useToast()
 
   const team = teams.find((t) => t.slug === teamSlug)
@@ -41,13 +41,17 @@ export default function ProductDetail() {
 
   useEffect(() => {
     if (teamProduct) {
-      if (teamProduct.sizes.length > 0) setSelectedSize(teamProduct.sizes[0])
-      if (teamProduct.colors.length > 0) setSelectedColor(teamProduct.colors[0])
-      if (teamProduct.models && teamProduct.models.length > 0)
-        setSelectedModel(teamProduct.models[0])
+      const tSizes = teamProduct.sizes || []
+      const tColors = teamProduct.colors || []
+      const tModels = teamProduct.models || []
+      const tCustom = teamProduct.customizationFields || []
+
+      if (tSizes.length > 0) setSelectedSize(tSizes[0])
+      if (tColors.length > 0) setSelectedColor(tColors[0])
+      if (tModels.length > 0) setSelectedModel(tModels[0])
 
       const defaults: Record<string, string> = {}
-      teamProduct.customizationFields.forEach((field) => {
+      tCustom.forEach((field) => {
         if (field.type === 'select' && field.options?.length === 1) {
           defaults[field.label] = field.options[0]
         }
@@ -80,8 +84,27 @@ export default function ProductDetail() {
     }
   }, [corFaixa])
 
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-20 text-center">
+        <div className="animate-pulse flex flex-col items-center gap-4">
+          <div className="w-10 h-10 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+          <p className="text-muted-foreground font-medium uppercase tracking-widest">
+            Carregando...
+          </p>
+        </div>
+      </div>
+    )
+  }
+
   if (!team || !product || !teamProduct)
     return <div className="p-20 text-center font-heading text-xl">Produto não encontrado.</div>
+
+  const customizationFields = teamProduct.customizationFields || []
+  const sizes = teamProduct.sizes || []
+  const colors = teamProduct.colors || []
+  const models = teamProduct.models || []
+  const images = product.images || []
 
   const isFieldVisible = (field: CustomizationField) => {
     if (field.name === 'cor_personalizacao') {
@@ -93,7 +116,7 @@ export default function ProductDetail() {
     return true
   }
 
-  const customPrice = teamProduct.customizationFields.reduce((acc, field) => {
+  const customPrice = customizationFields.reduce((acc, field) => {
     if (
       isFieldVisible(field) &&
       customValues[field.label] &&
@@ -108,12 +131,11 @@ export default function ProductDetail() {
 
   const handleAddToCart = () => {
     const missingFields = []
-    if (teamProduct.sizes.length > 0 && !selectedSize) missingFields.push('Tamanho')
-    if (teamProduct.colors.length > 0 && !selectedColor) missingFields.push('Cor')
-    if (teamProduct.models && teamProduct.models.length > 0 && !selectedModel)
-      missingFields.push('Modelo')
+    if (sizes.length > 0 && !selectedSize) missingFields.push('Tamanho')
+    if (colors.length > 0 && !selectedColor) missingFields.push('Cor')
+    if (models.length > 0 && !selectedModel) missingFields.push('Modelo')
 
-    for (const field of teamProduct.customizationFields) {
+    for (const field of customizationFields) {
       if (!isFieldVisible(field)) continue
 
       if (
@@ -146,7 +168,7 @@ export default function ProductDetail() {
       color: selectedColor,
       model: selectedModel,
       customizations: customValues,
-      image: product.images[0],
+      image: images[0] || '',
     })
 
     toast({
@@ -188,15 +210,17 @@ export default function ProductDetail() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16">
         <div className="space-y-4">
           <div className="aspect-[4/5] bg-muted rounded-xl overflow-hidden border border-border shadow-sm">
-            <img
-              src={product.images[0]}
-              alt={product.name}
-              className="w-full h-full object-cover"
-            />
+            {images.length > 0 ? (
+              <img src={images[0]} alt={product.name} className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                Sem imagem
+              </div>
+            )}
           </div>
-          {product.images.length > 1 && (
+          {images.length > 1 && (
             <div className="flex gap-4">
-              {product.images.slice(1).map((img, i) => (
+              {images.slice(1).map((img, i) => (
                 <div
                   key={i}
                   className="w-24 h-30 bg-muted rounded-md overflow-hidden cursor-pointer border-2 border-transparent hover:border-accent transition-colors"
@@ -225,11 +249,11 @@ export default function ProductDetail() {
           </div>
 
           <div className="space-y-8 flex-1">
-            {teamProduct.models && teamProduct.models.length > 0 && (
+            {models.length > 0 && (
               <div>
                 <Label className="text-base font-bold mb-4 block">Modelo: {selectedModel}</Label>
                 <div className="flex flex-wrap gap-3">
-                  {teamProduct.models.map((m) => (
+                  {models.map((m) => (
                     <Button
                       key={m}
                       variant={selectedModel === m ? 'default' : 'outline'}
@@ -243,7 +267,7 @@ export default function ProductDetail() {
               </div>
             )}
 
-            {teamProduct.sizes.length > 0 && (
+            {sizes.length > 0 && (
               <div>
                 <div className="flex justify-between items-center mb-4">
                   <Label className="text-base font-bold">Tamanho: {selectedSize}</Label>
@@ -290,7 +314,7 @@ export default function ProductDetail() {
                   </Dialog>
                 </div>
                 <div className="flex flex-wrap gap-3">
-                  {teamProduct.sizes.map((size) => (
+                  {sizes.map((size) => (
                     <Button
                       key={size}
                       variant={selectedSize === size ? 'default' : 'outline'}
@@ -304,11 +328,11 @@ export default function ProductDetail() {
               </div>
             )}
 
-            {teamProduct.colors.length > 0 && (
+            {colors.length > 0 && (
               <div>
                 <Label className="text-base font-bold mb-4 block">Cor: {selectedColor}</Label>
                 <div className="flex flex-wrap gap-4">
-                  {teamProduct.colors.map((color) => (
+                  {colors.map((color) => (
                     <button
                       key={color}
                       onClick={() => setSelectedColor(color)}
@@ -321,10 +345,10 @@ export default function ProductDetail() {
               </div>
             )}
 
-            {teamProduct.customizationFields.length > 0 && (
+            {customizationFields.length > 0 && (
               <div className="pt-8 border-t border-border mt-8 space-y-6">
                 <h3 className="font-heading font-bold text-xl uppercase">Personalização</h3>
-                {teamProduct.customizationFields.filter(isFieldVisible).map((field) => (
+                {customizationFields.filter(isFieldVisible).map((field) => (
                   <div
                     key={field.id}
                     className="bg-muted/30 p-4 rounded-lg border border-border/50 animate-in fade-in"

@@ -8,7 +8,7 @@ import { Label } from '../components/ui/label'
 
 export default function Catalog() {
   const { teamSlug } = useParams()
-  const { teams, teamProducts, products } = useStore()
+  const { teams, teamProducts, products, isLoading } = useStore()
   const [filterCategory, setFilterCategory] = useState<string | null>(null)
   const [inStockOnly, setInStockOnly] = useState(false)
 
@@ -28,6 +28,19 @@ export default function Catalog() {
     })
     return Array.from(cats).sort()
   }, [teamProductsList, products])
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-20 text-center">
+        <div className="animate-pulse flex flex-col items-center gap-4">
+          <div className="w-10 h-10 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+          <p className="text-muted-foreground font-medium uppercase tracking-widest">
+            Carregando catálogo...
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   if (!team) return <Navigate to="/404" />
 
