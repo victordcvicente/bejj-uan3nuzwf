@@ -81,19 +81,23 @@ export default function Checkout() {
 
       const payload: any = {
         userId: user?.id || 'guest',
-        customerName: name,
-        customerEmail: email,
-        customerCpf: cpf,
+        customerName: name.trim(),
+        customerEmail: email.trim(),
+        customerCpf: cpf.trim(),
         items: [...cart],
         total,
         paymentStatus: 'PENDING',
         productionStatus: 'PENDING',
-        receiptUrl: b64Receipt,
       }
 
-      if (teamId) {
+      if (b64Receipt) {
+        payload.receiptUrl = b64Receipt
+      }
+
+      if (teamId && teamId !== 'none') {
         payload.teamId = teamId
       }
+
       if (selectedGym && selectedGym !== 'none') {
         payload.gymId = selectedGym
       }

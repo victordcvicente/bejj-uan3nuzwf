@@ -101,11 +101,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const addOrder = async (order: Partial<Order>) => {
     const { id, ...data } = order
-    const payload = { ...data } as any
+    const payload = { ...data } as Record<string, any>
 
-    // Ensure we don't send empty strings for relation fields, avoiding PocketBase 400 errors
-    if (!payload.teamId) delete payload.teamId
-    if (!payload.gymId) delete payload.gymId
+    // Ensure we don't send empty strings, nulls, or invalid strings for any fields,
+    // avoiding PocketBase 400 validation errors (especially on relation fields).
+    Object.keys(payload).forEach((key) => {
+      const val = payload[key]
+      if (val === '' || val === null || val === undefined || val === 'none') {
+        delete payload[key]
+      }
+    })
 
     return await pb.collection('orders').create(payload)
   }
