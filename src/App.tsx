@@ -8,6 +8,7 @@ import { Layout } from '@/components/Layout'
 import Index from '@/pages/Index'
 import TeamHome from '@/pages/TeamHome'
 import Catalog from '@/pages/Catalog'
+import GlobalCatalog from '@/pages/GlobalCatalog'
 import ProductDetail from '@/pages/ProductDetail'
 import Checkout from '@/pages/Checkout'
 import Tracking from '@/pages/Tracking'
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
 
             {/* Global Student Routes */}
+            <Route path="/catalog" element={<GlobalCatalog />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/tracking" element={<Tracking />} />
 

@@ -11,7 +11,7 @@ import {
   TableRow,
 } from '../../components/ui/table'
 import { Badge } from '../../components/ui/badge'
-import { PlusCircle, Edit, ShieldAlert } from 'lucide-react'
+import { PlusCircle, Edit, ShieldAlert, Package } from 'lucide-react'
 
 export default function AdminDashboard() {
   const { teams, products, teamProducts, gyms } = useStore()
@@ -67,12 +67,56 @@ export default function AdminDashboard() {
         </Card>
       </div>
 
-      <Tabs defaultValue="teams" className="w-full">
-        <TabsList className="mb-4">
+      <Tabs defaultValue="catalog" className="w-full">
+        <TabsList className="mb-4 flex-wrap h-auto gap-2 justify-start">
+          <TabsTrigger value="catalog">Catálogo Base</TabsTrigger>
+          <TabsTrigger value="rules">Regras Comerciais</TabsTrigger>
           <TabsTrigger value="teams">Gestão de Equipes</TabsTrigger>
           <TabsTrigger value="gyms">Academias (Retirada)</TabsTrigger>
-          <TabsTrigger value="rules">Regras Comerciais</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="catalog">
+          <Card>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Imagem</TableHead>
+                  <TableHead>Nome do Produto</TableHead>
+                  <TableHead>Categoria</TableHead>
+                  <TableHead>Descrição</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {products.map((product) => (
+                  <TableRow key={product.id}>
+                    <TableCell>
+                      <div className="w-10 h-10 rounded-md overflow-hidden bg-muted border">
+                        <img
+                          src={product.images[0]}
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </TableCell>
+                    <TableCell className="font-medium">{product.name}</TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">{product.category}</Badge>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground max-w-[300px] truncate">
+                      {product.description}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="ghost" size="sm">
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Card>
+        </TabsContent>
 
         <TabsContent value="teams">
           <Card>
@@ -100,7 +144,7 @@ export default function AdminDashboard() {
                     <TableCell className="text-muted-foreground">/{team.slug}</TableCell>
                     <TableCell>
                       <div
-                        className={`w-6 h-6 rounded-full ${team.primaryColor}`}
+                        className={`w-6 h-6 rounded-full border ${team.primaryColor}`}
                         title={team.primaryColor}
                       ></div>
                     </TableCell>
@@ -150,7 +194,7 @@ export default function AdminDashboard() {
 
         <TabsContent value="rules">
           <Card>
-            <div className="p-4 bg-yellow-50 border-b flex items-start gap-3 text-yellow-800">
+            <div className="p-4 bg-amber-50 border-b flex items-start gap-3 text-amber-800">
               <ShieldAlert className="w-5 h-5 flex-shrink-0 mt-0.5" />
               <p className="text-sm">
                 As regras comerciais definem o preço final e as opções de personalização de um
@@ -175,11 +219,18 @@ export default function AdminDashboard() {
                   return (
                     <TableRow key={tp.id}>
                       <TableCell className="font-medium">{t?.name}</TableCell>
-                      <TableCell>{p?.name}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Package className="w-4 h-4 text-muted-foreground" />
+                          {p?.name}
+                        </div>
+                      </TableCell>
                       <TableCell className="font-bold">R$ {tp.price.toFixed(2)}</TableCell>
                       <TableCell>
                         {tp.inStock ? (
-                          <Badge className="bg-green-500">Ativo</Badge>
+                          <Badge className="bg-green-100 text-green-800 border-green-200">
+                            Ativo
+                          </Badge>
                         ) : (
                           <Badge variant="destructive">Esgotado</Badge>
                         )}

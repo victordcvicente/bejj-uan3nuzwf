@@ -15,6 +15,7 @@ export default function ProductCard({ teamProduct, product, team }: Props) {
       Preto: '#000000',
       Branco: '#ffffff',
       'Off White': '#f8f9fa',
+      Offwhite: '#f8f9fa',
       Azul: '#1e3a8a',
       Cinza: '#9ca3af',
       Vermelho: '#dc2626',
@@ -47,14 +48,16 @@ export default function ProductCard({ teamProduct, product, team }: Props) {
           />
           <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors duration-300" />
         </div>
-        <CardContent className="p-5 flex-1">
+        <CardContent className="p-5 flex-1 flex flex-col">
           <p className="text-xs text-accent font-bold mb-1 uppercase tracking-widest">
             {product.category}
           </p>
           <h3 className="font-bold text-lg leading-tight mb-2 line-clamp-2 group-hover:text-accent transition-colors">
             {product.name}
           </h3>
-          <div className="text-sm text-muted-foreground line-clamp-2">{product.description}</div>
+          <div className="text-sm text-muted-foreground line-clamp-2 mt-auto">
+            {product.description}
+          </div>
         </CardContent>
         <CardFooter className="p-5 pt-0 flex justify-between items-end">
           <div className="font-heading font-black text-2xl">
