@@ -22,7 +22,6 @@ migrate(
 
     collection.listRule = "@request.auth.id != ''"
     collection.viewRule = "@request.auth.id != ''"
-    // Fix for invalid rule left operand "@request.data.role"
     collection.createRule = ''
     collection.updateRule = "@request.auth.id = id || @request.auth.role = 'ADMIN'"
     collection.deleteRule = "@request.auth.id = id || @request.auth.role = 'ADMIN'"
