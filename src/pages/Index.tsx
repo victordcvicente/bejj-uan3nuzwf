@@ -11,9 +11,11 @@ import {
 } from '@/components/ui/carousel'
 import Autoplay from 'embla-carousel-autoplay'
 import { useRef } from 'react'
+import { useStore } from '@/store'
 
 export default function Index() {
   const plugin = useRef(Autoplay({ delay: 5000, stopOnInteraction: true }))
+  const { teams } = useStore()
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-4rem)]">
@@ -22,70 +24,85 @@ export default function Index() {
           <Carousel plugins={[plugin.current]} className="w-full bg-muted/40" opts={{ loop: true }}>
             <CarouselContent>
               <CarouselItem>
-                <div className="h-[350px] bg-neutral-900 text-white flex flex-col items-center justify-center p-6 text-center relative overflow-hidden">
+                <div className="h-[280px] md:h-[350px] bg-neutral-900 text-white flex flex-col items-center justify-center p-6 text-center relative overflow-hidden">
                   <div className="absolute inset-0 bg-black/40 z-0"></div>
                   <div className="relative z-10 max-w-3xl flex flex-col items-center animate-fade-in-up">
-                    <div className="bg-white rounded-2xl p-2 mb-6 shadow-xl">
+                    <div className="bg-white rounded-2xl p-2 mb-4 shadow-xl">
                       <img
                         src={logoUrl}
                         alt="BEJJ Logo"
-                        className="h-16 md:h-20 w-auto object-contain"
+                        className="h-12 md:h-16 w-auto object-contain"
                       />
                     </div>
-                    <h2 className="text-3xl md:text-5xl font-black mb-4 uppercase tracking-tight drop-shadow-lg">
-                      Bem-vindo ao PORTAL BEJJ
+                    <h2 className="text-2xl md:text-4xl font-black mb-3 uppercase tracking-tight drop-shadow-lg">
+                      PORTAL BEJJ
                     </h2>
-                    <p className="text-gray-200 md:text-lg max-w-2xl drop-shadow-md">
-                      A plataforma exclusiva para pedidos de produtos personalizados. Vista a
-                      armadura da sua equipe com qualidade premium e design impecável.
+                    <p className="text-gray-200 text-sm md:text-base max-w-xl drop-shadow-md">
+                      Plataforma de produtos personalizados. Vista a armadura da sua equipe com
+                      qualidade premium.
                     </p>
                   </div>
                 </div>
               </CarouselItem>
               <CarouselItem>
-                <div className="h-[350px] bg-primary text-primary-foreground flex flex-col items-center justify-center p-6 text-center">
-                  <h2 className="text-3xl md:text-5xl font-black mb-6 uppercase tracking-tight drop-shadow-lg">
+                <div className="h-[280px] md:h-[350px] bg-primary text-primary-foreground flex flex-col items-center justify-center p-6 text-center">
+                  <h2 className="text-2xl md:text-4xl font-black mb-4 uppercase tracking-tight drop-shadow-lg">
                     Como Funciona?
                   </h2>
-                  <p className="max-w-2xl text-primary-foreground/90 md:text-xl leading-relaxed">
-                    Encontre sua academia, acesse o catálogo da sua equipe e personalize seus itens
-                    com tamanhos, nomes e graduações. Faça o pagamento seguro via PIX e receba seu
-                    pedido diretamente no tatame!
+                  <p className="max-w-2xl text-primary-foreground/90 text-sm md:text-lg leading-relaxed">
+                    Acesse o catálogo da sua equipe, personalize seus itens e faça o pagamento
+                    seguro via PIX. Receba seu pedido diretamente no tatame!
                   </p>
                 </div>
               </CarouselItem>
-              <CarouselItem>
-                <div className="h-[350px] bg-accent text-accent-foreground flex flex-col items-center justify-center p-6 text-center">
-                  <h2 className="text-3xl md:text-5xl font-black mb-8 uppercase tracking-tight drop-shadow-lg">
-                    Pronto para vestir sua armadura?
-                  </h2>
-                  <Button
-                    size="lg"
-                    asChild
-                    className="bg-background text-foreground hover:bg-background/90 text-lg h-14 px-8 font-bold shadow-xl hover:scale-105 transition-transform"
-                  >
-                    <Link to="/catalog">
-                      Acessar Catálogos <ArrowRight className="ml-2 h-5 w-5" />
-                    </Link>
-                  </Button>
-                </div>
-              </CarouselItem>
             </CarouselContent>
-            <CarouselPrevious className="left-4 bg-background/20 hover:bg-background border-none text-white hover:text-foreground" />
-            <CarouselNext className="right-4 bg-background/20 hover:bg-background border-none text-white hover:text-foreground" />
+            <CarouselPrevious className="left-4 bg-background/20 hover:bg-background border-none text-white hover:text-foreground h-8 w-8" />
+            <CarouselNext className="right-4 bg-background/20 hover:bg-background border-none text-white hover:text-foreground h-8 w-8" />
           </Carousel>
         </section>
 
-        <section className="w-full py-16 md:py-24 bg-background border-t">
+        <section className="w-full py-12 md:py-16 bg-muted/20 border-t border-b">
+          <div className="container px-4 md:px-6">
+            <div className="text-center mb-10">
+              <h2 className="text-2xl font-bold tracking-tight sm:text-3xl mb-2">
+                Acesse sua Equipe
+              </h2>
+              <p className="text-muted-foreground text-sm md:text-base max-w-[600px] mx-auto">
+                Selecione o catálogo oficial da sua bandeira para visualizar os produtos.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap justify-center gap-4 max-w-4xl mx-auto">
+              {teams.slice(0, 6).map((team) => (
+                <Link key={team.id} to={`/${team.slug}`} className="group relative">
+                  <div className="flex items-center gap-3 bg-background border p-3 rounded-full shadow-sm hover:shadow-md transition-all pr-5 hover:border-primary/50">
+                    <img
+                      src={team.logo}
+                      alt={team.name}
+                      className="w-10 h-10 rounded-full object-contain bg-white border"
+                    />
+                    <span className="font-bold text-sm group-hover:text-primary transition-colors">
+                      {team.name}
+                    </span>
+                  </div>
+                </Link>
+              ))}
+              <Link to="/catalog">
+                <div className="flex items-center gap-3 bg-primary text-primary-foreground border-primary p-3 rounded-full shadow-sm hover:shadow-md transition-all px-6 hover:bg-primary/90">
+                  <span className="font-bold text-sm">Ver Todas as Equipes</span>
+                  <ArrowRight className="w-4 h-4" />
+                </div>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        <section className="w-full py-16 md:py-20 bg-background">
           <div className="container px-4 md:px-6">
             <div className="text-center mb-16">
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4">
                 O Processo BEJJ
               </h2>
-              <p className="text-muted-foreground md:text-lg max-w-[800px] mx-auto">
-                Desenvolvemos um processo simples e direto para que você possa focar no que
-                realmente importa: seus treinos no tatame.
-              </p>
             </div>
 
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
@@ -114,10 +131,10 @@ export default function Index() {
                 <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
                   <ShieldCheck className="h-8 w-8" />
                 </div>
-                <h3 className="text-xl font-bold">3. Pagamento via PIX</h3>
+                <h3 className="text-xl font-bold">3. Pagamento Seguro</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Processo rápido e seguro com anexo de comprovante para rápida liberação do pedido
-                  na produção.
+                  Processo rápido e obrigatório via PIX com anexo de comprovante para rápida
+                  liberação na produção.
                 </p>
               </div>
 
@@ -127,8 +144,8 @@ export default function Index() {
                 </div>
                 <h3 className="text-xl font-bold">4. Receba no Tatame</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Acompanhe a fabricação em tempo real e retire seus produtos diretamente na sua
-                  academia.
+                  Acompanhe a fabricação e retire seus produtos diretamente na sua academia
+                  vinculada.
                 </p>
               </div>
             </div>
@@ -140,7 +157,7 @@ export default function Index() {
                 variant="outline"
                 className="h-12 px-8 text-base font-semibold"
               >
-                <Link to="/tracking">Acompanhar Pedido</Link>
+                <Link to="/tracking">Acompanhar Pedido Existente</Link>
               </Button>
             </div>
           </div>

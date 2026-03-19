@@ -61,6 +61,7 @@ export function TeamCatalogsTab() {
   } = useStore()
   const [teamId, setTeamId] = useState(teams[0]?.id || '')
   const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
   const [editId, setEditId] = useState<string | null>(null)
 
   const [form, setForm] = useState({
@@ -91,44 +92,57 @@ export function TeamCatalogsTab() {
     setOpen(true)
   }
 
-  const handleSave = () => {
-    const pData = { name: form.name, category: form.cat, description: form.desc, images: form.imgs }
-    const tpData = {
-      price: Number(form.price),
-      inStock: form.stock,
-      sizes: form.sizes
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean),
-      colors: form.colors
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean),
-    }
-
-    if (editId) {
-      const tp = teamProducts.find((t) => t.id === editId)
-      if (tp) {
-        updateTeamProduct(tp.id, tpData)
-        updateProduct(tp.productId, pData)
+  const handleSave = async () => {
+    setLoading(true)
+    try {
+      const pData = {
+        name: form.name,
+        category: form.cat,
+        description: form.desc,
+        images: form.imgs,
       }
-    } else {
-      const pId = `p-${Date.now()}`
-      addProduct({ id: pId, ...pData })
-      addTeamProduct({
-        id: `tp-${Date.now()}`,
-        teamId,
-        productId: pId,
-        customizationFields: [],
-        ...tpData,
-      })
+      const tpData = {
+        price: Number(form.price),
+        inStock: form.stock,
+        sizes: form.sizes
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean),
+        colors: form.colors
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean),
+      }
+
+      if (editId) {
+        const tp = teamProducts.find((t) => t.id === editId)
+        if (tp) {
+          await updateProduct(tp.productId, pData)
+          await updateTeamProduct(tp.id, tpData)
+        }
+      } else {
+        const newProduct = await addProduct(pData)
+        await addTeamProduct({
+          teamId,
+          productId: newProduct.id,
+          customizationFields: [],
+          ...tpData,
+        })
+      }
+      setOpen(false)
+    } catch (e) {
+      console.error(e)
+      alert('Erro ao salvar produto.')
+    } finally {
+      setLoading(false)
     }
-    setOpen(false)
   }
 
-  const handleDel = (tpId: string, pId: string) => {
-    deleteTeamProduct(tpId)
-    deleteProduct(pId)
+  const handleDel = async (tpId: string, pId: string) => {
+    if (confirm('Tem certeza que deseja apagar este produto?')) {
+      await deleteTeamProduct(tpId)
+      await deleteProduct(pId)
+    }
   }
 
   const handleUp = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -195,7 +209,7 @@ export function TeamCatalogsTab() {
             return (
               <TableRow key={tp.id}>
                 <TableCell>
-                  {p.images[0] ? (
+                  {p.images?.[0] ? (
                     <img
                       src={p.images[0]}
                       className="w-10 h-10 object-cover rounded border"
@@ -335,8 +349,8 @@ export function TeamCatalogsTab() {
               </div>
             </div>
           </div>
-          <Button onClick={handleSave} className="w-full mt-4">
-            Salvar Alterações
+          <Button onClick={handleSave} disabled={loading} className="w-full mt-4">
+            {loading ? 'Salvando...' : 'Salvar Alterações'}
           </Button>
         </DialogContent>
       </Dialog>

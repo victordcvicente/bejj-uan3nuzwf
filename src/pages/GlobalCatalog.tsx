@@ -35,6 +35,7 @@ export default function GlobalCatalog() {
   const { teams, gyms, role, updateTeam } = useStore()
   const [searchTerm, setSearchTerm] = useState('')
   const [editTeamId, setEditTeamId] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
   const [form, setForm] = useState({ logo: '', coverImage: '' })
 
   const filteredTeams = teams.filter((team) =>
@@ -48,11 +49,19 @@ export default function GlobalCatalog() {
     setForm({ logo: t.logo, coverImage: t.coverImage })
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (editTeamId) {
-      updateTeam(editTeamId, form)
+      setLoading(true)
+      try {
+        await updateTeam(editTeamId, form)
+        setEditTeamId(null)
+      } catch (e) {
+        console.error(e)
+        alert('Erro ao salvar as edições visuais da equipe.')
+      } finally {
+        setLoading(false)
+      }
     }
-    setEditTeamId(null)
   }
 
   const handleUpload = async (
@@ -205,8 +214,8 @@ export default function GlobalCatalog() {
                 </label>
               </div>
             </div>
-            <Button onClick={handleSave} className="w-full mt-2">
-              Salvar Alterações
+            <Button onClick={handleSave} disabled={loading} className="w-full mt-2">
+              {loading ? 'Salvando...' : 'Salvar Alterações'}
             </Button>
           </div>
         </DialogContent>

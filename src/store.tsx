@@ -1,12 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { Team, Product, TeamProduct, Order, CartItem, Gym, Role } from './types'
-import {
-  MOCK_TEAMS,
-  MOCK_PRODUCTS,
-  MOCK_TEAM_PRODUCTS,
-  MOCK_ORDERS,
-  MOCK_GYMS,
-} from './lib/mockData'
+import pb from '@/lib/pocketbase/client'
+import { useRealtime } from '@/hooks/use-realtime'
 
 interface StoreContextType {
   role: Role
@@ -20,89 +15,153 @@ interface StoreContextType {
   addToCart: (item: CartItem) => void
   removeFromCart: (id: string) => void
   clearCart: () => void
-  addOrder: (order: Order) => void
-  updateOrderStatus: (orderId: string, status: Order['productionStatus']) => void
-  updatePaymentStatus: (orderId: string, status: Order['paymentStatus']) => void
+  addOrder: (order: Partial<Order>) => Promise<any>
+  updateOrderStatus: (orderId: string, status: Order['productionStatus']) => Promise<void>
+  updatePaymentStatus: (orderId: string, status: Order['paymentStatus']) => Promise<void>
 
-  addProduct: (product: Product) => void
-  updateProduct: (id: string, product: Partial<Product>) => void
-  deleteProduct: (id: string) => void
+  addProduct: (product: Partial<Product>) => Promise<any>
+  updateProduct: (id: string, product: Partial<Product>) => Promise<void>
+  deleteProduct: (id: string) => Promise<void>
 
-  addTeam: (team: Team) => void
-  updateTeam: (id: string, team: Partial<Team>) => void
-  deleteTeam: (id: string) => void
+  addTeam: (team: Partial<Team>) => Promise<void>
+  updateTeam: (id: string, team: Partial<Team>) => Promise<void>
+  deleteTeam: (id: string) => Promise<void>
 
-  addGym: (gym: Gym) => void
-  updateGym: (id: string, gym: Partial<Gym>) => void
-  deleteGym: (id: string) => void
+  addGym: (gym: Partial<Gym>) => Promise<void>
+  updateGym: (id: string, gym: Partial<Gym>) => Promise<void>
+  deleteGym: (id: string) => Promise<void>
 
-  addTeamProduct: (tp: TeamProduct) => void
-  updateTeamProduct: (id: string, tp: Partial<TeamProduct>) => void
-  deleteTeamProduct: (id: string) => void
+  addTeamProduct: (tp: Partial<TeamProduct>) => Promise<any>
+  updateTeamProduct: (id: string, tp: Partial<TeamProduct>) => Promise<void>
+  deleteTeamProduct: (id: string) => Promise<void>
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined)
 
-function loadData<T>(key: string, fallback: T): T {
-  try {
-    const item = localStorage.getItem(key)
-    return item ? JSON.parse(item) : fallback
-  } catch (e) {
-    return fallback
-  }
-}
-
 export function StoreProvider({ children }: { children: ReactNode }) {
-  const [role, setRole] = useState<Role>(() => loadData('bejj_role', 'ADMIN'))
-  const [teams, setTeams] = useState<Team[]>(() => loadData('bejj_teams', MOCK_TEAMS))
-  const [gyms, setGyms] = useState<Gym[]>(() => loadData('bejj_gyms', MOCK_GYMS))
-  const [products, setProducts] = useState<Product[]>(() =>
-    loadData('bejj_products', MOCK_PRODUCTS),
-  )
-  const [teamProducts, setTeamProducts] = useState<TeamProduct[]>(() =>
-    loadData('bejj_teamProducts', MOCK_TEAM_PRODUCTS),
-  )
-  const [orders, setOrders] = useState<Order[]>(() => loadData('bejj_orders', MOCK_ORDERS))
-  const [cart, setCart] = useState<CartItem[]>([])
+  const [role, setRole] = useState<Role>(() => {
+    try {
+      return (localStorage.getItem('bejj_role') as Role) || 'ADMIN'
+    } catch {
+      return 'ADMIN'
+    }
+  })
+
+  const [teams, setTeams] = useState<Team[]>([])
+  const [gyms, setGyms] = useState<Gym[]>([])
+  const [products, setProducts] = useState<Product[]>([])
+  const [teamProducts, setTeamProducts] = useState<TeamProduct[]>([])
+  const [orders, setOrders] = useState<Order[]>([])
+  const [cart, setCart] = useState<CartItem[]>(() => {
+    try {
+      const item = localStorage.getItem('bejj_cart')
+      return item ? JSON.parse(item) : []
+    } catch {
+      return []
+    }
+  })
 
   useEffect(() => {
-    localStorage.setItem('bejj_role', JSON.stringify(role))
-    localStorage.setItem('bejj_teams', JSON.stringify(teams))
-    localStorage.setItem('bejj_gyms', JSON.stringify(gyms))
-    localStorage.setItem('bejj_products', JSON.stringify(products))
-    localStorage.setItem('bejj_teamProducts', JSON.stringify(teamProducts))
-    localStorage.setItem('bejj_orders', JSON.stringify(orders))
-  }, [role, teams, gyms, products, teamProducts, orders])
+    localStorage.setItem('bejj_role', role)
+  }, [role])
+
+  useEffect(() => {
+    localStorage.setItem('bejj_cart', JSON.stringify(cart))
+  }, [cart])
+
+  const loadData = async () => {
+    try {
+      const [t, g, p, tp, o] = await Promise.all([
+        pb.collection('teams').getFullList(),
+        pb.collection('gyms').getFullList(),
+        pb.collection('products').getFullList(),
+        pb.collection('team_products').getFullList(),
+        pb.collection('orders').getFullList({ sort: '-created' }),
+      ])
+      setTeams(t as any)
+      setGyms(g as any)
+      setProducts(p as any)
+      setTeamProducts(tp as any)
+      setOrders(o as any)
+    } catch (error) {
+      console.error('Error loading data:', error)
+    }
+  }
+
+  useEffect(() => {
+    loadData()
+  }, [])
+
+  useRealtime('teams', async () => setTeams((await pb.collection('teams').getFullList()) as any))
+  useRealtime('gyms', async () => setGyms((await pb.collection('gyms').getFullList()) as any))
+  useRealtime('products', async () =>
+    setProducts((await pb.collection('products').getFullList()) as any),
+  )
+  useRealtime('team_products', async () =>
+    setTeamProducts((await pb.collection('team_products').getFullList()) as any),
+  )
+  useRealtime('orders', async () =>
+    setOrders((await pb.collection('orders').getFullList({ sort: '-created' })) as any),
+  )
 
   const addToCart = (item: CartItem) => setCart((prev) => [...prev, item])
   const removeFromCart = (id: string) => setCart((prev) => prev.filter((i) => i.id !== id))
   const clearCart = () => setCart([])
-  const addOrder = (order: Order) => setOrders((prev) => [order, ...prev])
-  const updateOrderStatus = (id: string, status: Order['productionStatus']) =>
-    setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, productionStatus: status } : o)))
-  const updatePaymentStatus = (id: string, status: Order['paymentStatus']) =>
-    setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, paymentStatus: status } : o)))
 
-  const addProduct = (p: Product) => setProducts((prev) => [...prev, p])
-  const updateProduct = (id: string, p: Partial<Product>) =>
-    setProducts((prev) => prev.map((x) => (x.id === id ? { ...x, ...p } : x)))
-  const deleteProduct = (id: string) => setProducts((prev) => prev.filter((x) => x.id !== id))
+  const addOrder = async (order: Partial<Order>) => {
+    const { id, ...data } = order
+    return await pb.collection('orders').create(data)
+  }
+  const updateOrderStatus = async (id: string, status: Order['productionStatus']) => {
+    await pb.collection('orders').update(id, { productionStatus: status })
+  }
+  const updatePaymentStatus = async (id: string, status: Order['paymentStatus']) => {
+    await pb.collection('orders').update(id, { paymentStatus: status })
+  }
 
-  const addTeam = (t: Team) => setTeams((prev) => [...prev, t])
-  const updateTeam = (id: string, t: Partial<Team>) =>
-    setTeams((prev) => prev.map((x) => (x.id === id ? { ...x, ...t } : x)))
-  const deleteTeam = (id: string) => setTeams((prev) => prev.filter((x) => x.id !== id))
+  const addProduct = async (p: Partial<Product>) => {
+    const { id, ...data } = p
+    return await pb.collection('products').create(data)
+  }
+  const updateProduct = async (id: string, p: Partial<Product>) => {
+    await pb.collection('products').update(id, p)
+  }
+  const deleteProduct = async (id: string) => {
+    await pb.collection('products').delete(id)
+  }
 
-  const addGym = (g: Gym) => setGyms((prev) => [...prev, g])
-  const updateGym = (id: string, g: Partial<Gym>) =>
-    setGyms((prev) => prev.map((x) => (x.id === id ? { ...x, ...g } : x)))
-  const deleteGym = (id: string) => setGyms((prev) => prev.filter((x) => x.id !== id))
+  const addTeam = async (t: Partial<Team>) => {
+    const { id, ...data } = t
+    await pb.collection('teams').create(data)
+  }
+  const updateTeam = async (id: string, t: Partial<Team>) => {
+    await pb.collection('teams').update(id, t)
+  }
+  const deleteTeam = async (id: string) => {
+    await pb.collection('teams').delete(id)
+  }
 
-  const addTeamProduct = (tp: TeamProduct) => setTeamProducts((prev) => [...prev, tp])
-  const updateTeamProduct = (id: string, tp: Partial<TeamProduct>) =>
-    setTeamProducts((prev) => prev.map((x) => (x.id === id ? { ...x, ...tp } : x)))
-  const deleteTeamProduct = (id: string) =>
-    setTeamProducts((prev) => prev.filter((x) => x.id !== id))
+  const addGym = async (g: Partial<Gym>) => {
+    const { id, ...data } = g
+    await pb.collection('gyms').create(data)
+  }
+  const updateGym = async (id: string, g: Partial<Gym>) => {
+    await pb.collection('gyms').update(id, g)
+  }
+  const deleteGym = async (id: string) => {
+    await pb.collection('gyms').delete(id)
+  }
+
+  const addTeamProduct = async (tp: Partial<TeamProduct>) => {
+    const { id, ...data } = tp
+    return await pb.collection('team_products').create(data)
+  }
+  const updateTeamProduct = async (id: string, tp: Partial<TeamProduct>) => {
+    await pb.collection('team_products').update(id, tp)
+  }
+  const deleteTeamProduct = async (id: string) => {
+    await pb.collection('team_products').delete(id)
+  }
 
   return (
     <StoreContext.Provider

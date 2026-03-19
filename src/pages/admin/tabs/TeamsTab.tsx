@@ -18,6 +18,7 @@ import { Edit, Trash, PlusCircle } from 'lucide-react'
 export function TeamsTab() {
   const { teams, addTeam, updateTeam, deleteTeam } = useStore()
   const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState({
     name: '',
@@ -47,10 +48,24 @@ export function TeamsTab() {
     setOpen(true)
   }
 
-  const handleSave = () => {
-    if (editingId) updateTeam(editingId, form)
-    else addTeam({ id: `t-${Math.random().toString(36).substring(2, 9)}`, ...form })
-    setOpen(false)
+  const handleSave = async () => {
+    setLoading(true)
+    try {
+      if (editingId) {
+        await updateTeam(editingId, form)
+      } else {
+        await addTeam(form)
+      }
+      setOpen(false)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    if (confirm('Tem certeza? Esta ação apagará a equipe definitivamente.')) {
+      await deleteTeam(id)
+    }
   }
 
   return (
@@ -96,7 +111,7 @@ export function TeamsTab() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => deleteTeam(t.id)}
+                  onClick={() => handleDelete(t.id)}
                   className="text-destructive"
                 >
                   <Trash className="w-4 h-4" />
@@ -156,8 +171,8 @@ export function TeamsTab() {
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
               />
             </div>
-            <Button onClick={handleSave} className="mt-4">
-              Salvar
+            <Button onClick={handleSave} disabled={loading} className="mt-4">
+              {loading ? 'Salvando...' : 'Salvar'}
             </Button>
           </div>
         </DialogContent>

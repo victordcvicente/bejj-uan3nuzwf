@@ -1,12 +1,16 @@
+import { useState } from 'react'
 import { useStore } from '../../store'
 import { Order } from '../../types'
 import { Badge } from '../../components/ui/badge'
 import { Button } from '../../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '../../components/ui/card'
 import { Play, Check, Truck, AlertCircle, RefreshCw, Hammer } from 'lucide-react'
+import { useToast } from '../../hooks/use-toast'
 
 export default function ProductionDashboard() {
   const { orders, updateOrderStatus } = useStore()
+  const { toast } = useToast()
+  const [loadingId, setLoadingId] = useState<string | null>(null)
 
   // Columns
   const pending = orders.filter((o) => o.productionStatus === 'PENDING')
@@ -15,8 +19,23 @@ export default function ProductionDashboard() {
     (o) => o.productionStatus === 'SHIPPED' || o.productionStatus === 'DELIVERED',
   )
 
-  const handleStatusChange = (id: string, newStatus: Order['productionStatus']) => {
-    updateOrderStatus(id, newStatus)
+  const handleStatusChange = async (id: string, newStatus: Order['productionStatus']) => {
+    setLoadingId(id)
+    try {
+      await updateOrderStatus(id, newStatus)
+      toast({
+        title: 'Status atualizado',
+        description: `O pedido foi movido para: ${newStatus}`,
+      })
+    } catch (e) {
+      toast({
+        title: 'Erro',
+        description: 'Falha ao atualizar o status.',
+        variant: 'destructive',
+      })
+    } finally {
+      setLoadingId(null)
+    }
   }
 
   const renderCard = (order: Order) => (
@@ -57,19 +76,33 @@ export default function ProductionDashboard() {
         {order.productionStatus === 'PENDING' && (
           <Button
             size="sm"
+            disabled={loadingId === order.id}
             className="w-full bg-orange-500 hover:bg-orange-600 text-white shadow-sm"
             onClick={() => handleStatusChange(order.id, 'PRODUCTION')}
           >
-            <Play className="w-4 h-4 mr-2" /> Iniciar Produção
+            {loadingId === order.id ? (
+              'Atualizando...'
+            ) : (
+              <>
+                <Play className="w-4 h-4 mr-2" /> Iniciar Produção
+              </>
+            )}
           </Button>
         )}
         {order.productionStatus === 'PRODUCTION' && (
           <Button
             size="sm"
+            disabled={loadingId === order.id}
             className="w-full bg-blue-500 hover:bg-blue-600 text-white shadow-sm animate-pulse-once"
             onClick={() => handleStatusChange(order.id, 'SHIPPED')}
           >
-            <Check className="w-4 h-4 mr-2" /> Finalizar & Enviar
+            {loadingId === order.id ? (
+              'Atualizando...'
+            ) : (
+              <>
+                <Check className="w-4 h-4 mr-2" /> Finalizar & Enviar
+              </>
+            )}
           </Button>
         )}
         {(order.productionStatus === 'SHIPPED' || order.productionStatus === 'DELIVERED') && (

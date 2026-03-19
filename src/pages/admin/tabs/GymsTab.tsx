@@ -25,6 +25,7 @@ import { Edit, Trash, PlusCircle } from 'lucide-react'
 export function GymsTab() {
   const { gyms, teams, addGym, updateGym, deleteGym } = useStore()
   const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState({ name: '', teamId: '', address: '' })
 
@@ -40,10 +41,24 @@ export function GymsTab() {
     setOpen(true)
   }
 
-  const handleSave = () => {
-    if (editingId) updateGym(editingId, form)
-    else addGym({ id: `g-${Math.random().toString(36).substring(2, 9)}`, ...form })
-    setOpen(false)
+  const handleSave = async () => {
+    setLoading(true)
+    try {
+      if (editingId) {
+        await updateGym(editingId, form)
+      } else {
+        await addGym(form)
+      }
+      setOpen(false)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    if (confirm('Tem certeza? Esta ação removerá a academia.')) {
+      await deleteGym(id)
+    }
   }
 
   return (
@@ -78,7 +93,7 @@ export function GymsTab() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => deleteGym(g.id)}
+                    onClick={() => handleDelete(g.id)}
                     className="text-destructive"
                   >
                     <Trash className="w-4 h-4" />
@@ -125,8 +140,8 @@ export function GymsTab() {
                 onChange={(e) => setForm({ ...form, address: e.target.value })}
               />
             </div>
-            <Button onClick={handleSave} className="mt-4">
-              Salvar
+            <Button onClick={handleSave} disabled={loading} className="mt-4">
+              {loading ? 'Salvando...' : 'Salvar'}
             </Button>
           </div>
         </DialogContent>

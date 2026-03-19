@@ -21,6 +21,7 @@ export default function Checkout() {
   const navigate = useNavigate()
 
   const [step, setStep] = useState(1)
+  const [loading, setLoading] = useState(false)
 
   // Step 1 states
   const [name, setName] = useState('')
@@ -50,39 +51,47 @@ export default function Checkout() {
     )
   }
 
-  // Validations
+  // Validations - strict required fields
   const isStep1Valid = name.trim().length >= 3 && email.includes('@') && cpf.length >= 11
   const isStep2Valid = selectedGym !== ''
   const isStep3Valid = receipt !== null
 
-  const handleFinish = () => {
-    const orderId = `ORD-${Math.floor(Math.random() * 10000)}`
-    addOrder({
-      id: orderId,
-      userId: 'u1',
-      customerName: name,
-      customerEmail: email,
-      customerCpf: cpf,
-      teamId: teamId || 't1',
-      gymId: selectedGym,
-      items: [...cart],
-      total,
-      paymentStatus: 'PENDING',
-      productionStatus: 'PENDING',
-      createdAt: new Date().toISOString(),
-      receiptUrl: receipt ? URL.createObjectURL(receipt) : undefined,
-    })
+  const handleFinish = async () => {
+    setLoading(true)
+    try {
+      await addOrder({
+        userId: 'u1',
+        customerName: name,
+        customerEmail: email,
+        customerCpf: cpf,
+        teamId: teamId || 't1',
+        gymId: selectedGym,
+        items: [...cart],
+        total,
+        paymentStatus: 'PENDING',
+        productionStatus: 'PENDING',
+        receiptUrl: receipt ? URL.createObjectURL(receipt) : undefined,
+      })
 
-    clearCart()
-    setStep(4)
+      clearCart()
+      setStep(4)
 
-    // Simulate email dispatch
-    toast({
-      title: 'E-mail Enviado!',
-      description:
-        'Disparamos um e-mail com os dados do pedido e o comprovante para a academia e organizadores do catálogo.',
-      variant: 'default',
-    })
+      toast({
+        title: 'Pedido Recebido!',
+        description:
+          'Um e-mail foi disparado para a academia e organizadores com os detalhes e o seu comprovante.',
+        variant: 'default',
+      })
+    } catch (e) {
+      console.error(e)
+      toast({
+        title: 'Erro no Checkout',
+        description: 'Não foi possível finalizar seu pedido. Tente novamente.',
+        variant: 'destructive',
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -235,15 +244,15 @@ export default function Checkout() {
                 </div>
 
                 <div className="flex gap-4">
-                  <Button variant="ghost" onClick={() => setStep(2)}>
+                  <Button variant="ghost" onClick={() => setStep(2)} disabled={loading}>
                     Voltar
                   </Button>
                   <Button
                     className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold"
-                    disabled={!isStep3Valid}
+                    disabled={!isStep3Valid || loading}
                     onClick={handleFinish}
                   >
-                    Finalizar Pedido
+                    {loading ? 'Finalizando...' : 'Finalizar Pedido'}
                   </Button>
                 </div>
               </CardContent>

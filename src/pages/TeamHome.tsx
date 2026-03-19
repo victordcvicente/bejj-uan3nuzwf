@@ -1,9 +1,17 @@
 import { Navigate, useParams } from 'react-router-dom'
+import { useStore } from '@/store'
 
 export default function TeamHome() {
   const { teamSlug } = useParams()
+  const { teams } = useStore()
 
-  // As requested, the Team slug root should redirect directly to the catalog of that team.
-  // The Team Catalog handles rendering all the products for this team.
+  // Encontra a equipe pelo slug, senão redireciona para a home de catálogos globais
+  const team = teams.find((t) => t.slug === teamSlug)
+
+  if (!team) {
+    return <Navigate to="/catalog" replace />
+  }
+
+  // Direcionamento automático para o catálogo correspondente da equipe
   return <Navigate to={`/${teamSlug}/catalog`} replace />
 }
