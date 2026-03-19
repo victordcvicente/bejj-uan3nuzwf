@@ -15,6 +15,7 @@ import {
 } from '../components/ui/select'
 import { CheckCircle2, QrCode } from 'lucide-react'
 import { useToast } from '../hooks/use-toast'
+import { getErrorMessage } from '@/lib/pocketbase/errors'
 
 export default function Checkout() {
   const { cart, clearCart, addOrder, teams, gyms } = useStore()
@@ -62,7 +63,7 @@ export default function Checkout() {
   }
 
   const isStep1Valid = name.trim().length >= 3 && email.includes('@') && cpf.length >= 11
-  const isStep2Valid = selectedGym !== ''
+  const isStep2Valid = selectedGym !== '' && selectedGym !== 'none'
   const isStep3Valid = receipt !== null
 
   const handleFinish = async () => {
@@ -83,8 +84,8 @@ export default function Checkout() {
         customerName: name,
         customerEmail: email,
         customerCpf: cpf,
-        teamId: teamId || 't1',
-        gymId: selectedGym,
+        teamId: teamId || '',
+        gymId: selectedGym === 'none' ? '' : selectedGym,
         items: [...cart],
         total,
         paymentStatus: 'PENDING',
@@ -105,7 +106,9 @@ export default function Checkout() {
       console.error(e)
       toast({
         title: 'Erro no Checkout',
-        description: 'Não foi possível finalizar seu pedido. Tente novamente.',
+        description:
+          getErrorMessage(e) ||
+          'Não foi possível finalizar seu pedido. Verifique os dados informados.',
         variant: 'destructive',
       })
     } finally {
@@ -196,14 +199,14 @@ export default function Checkout() {
                         </SelectItem>
                       ))}
                       {availableGyms.length === 0 && (
-                        <SelectItem value="none" disabled>
-                          Nenhuma academia encontrada
+                        <SelectItem value="none">
+                          Nenhuma academia encontrada para esta equipe
                         </SelectItem>
                       )}
                     </SelectContent>
                   </Select>
                 </div>
-                {selectedGym && (
+                {selectedGym && selectedGym !== 'none' && (
                   <div className="p-4 bg-muted/50 rounded-lg text-sm border border-border mt-4">
                     <span className="font-bold block mb-1">Endereço de Entrega:</span>
                     <span className="text-muted-foreground">
