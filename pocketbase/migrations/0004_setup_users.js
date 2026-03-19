@@ -1,72 +1,43 @@
 migrate(
   (app) => {
-    const col = app.findCollectionByNameOrId('users')
+    const collection = app.findCollectionByNameOrId('users')
 
-    if (!col.fields.getByName('role')) {
-      col.fields.add(
+    if (!collection.fields.getByName('role')) {
+      collection.fields.add(
         new SelectField({
           name: 'role',
-          values: ['ADMIN', 'PRODUCTION', 'PROFESSOR', 'STUDENT'],
+          values: ['ADMIN', 'GYM_OWNER', 'USER'],
           maxSelect: 1,
         }),
       )
     }
-    if (!col.fields.getByName('phone')) {
-      col.fields.add(new TextField({ name: 'phone' }))
-    }
-    if (!col.fields.getByName('cpf')) {
-      col.fields.add(new TextField({ name: 'cpf' }))
-    }
-    if (!col.fields.getByName('professor')) {
-      col.fields.add(new TextField({ name: 'professor' }))
-    }
 
-    try {
-      const teamsCol = app.findCollectionByNameOrId('teams')
-      if (!col.fields.getByName('teamId')) {
-        col.fields.add(
-          new RelationField({ name: 'teamId', collectionId: teamsCol.id, maxSelect: 1 }),
-        )
-      }
-    } catch (e) {}
-
-    try {
-      const gymsCol = app.findCollectionByNameOrId('gyms')
-      if (!col.fields.getByName('gymId')) {
-        col.fields.add(new RelationField({ name: 'gymId', collectionId: gymsCol.id, maxSelect: 1 }))
-      }
-    } catch (e) {}
-
-    const passField = col.fields.getByName('password')
-    if (passField && passField.min > 6) {
-      passField.min = 6
-    }
-    if (col.passwordAuth && col.passwordAuth.minPasswordLength > 6) {
-      col.passwordAuth.minPasswordLength = 6
+    if (!collection.fields.getByName('name')) {
+      collection.fields.add(
+        new TextField({
+          name: 'name',
+        }),
+      )
     }
 
-    col.listRule = "id = @request.auth.id || @request.auth.role = 'ADMIN'"
-    col.viewRule = "id = @request.auth.id || @request.auth.role = 'ADMIN'"
-    col.updateRule = "id = @request.auth.id || @request.auth.role = 'ADMIN'"
-    col.deleteRule = "id = @request.auth.id || @request.auth.role = 'ADMIN'"
-    col.createRule = ''
+    collection.listRule = "@request.auth.id != ''"
+    collection.viewRule = "@request.auth.id != ''"
+    // Fix for invalid rule left operand "@request.data.role"
+    collection.createRule = ''
+    collection.updateRule = "@request.auth.id = id || @request.auth.role = 'ADMIN'"
+    collection.deleteRule = "@request.auth.id = id || @request.auth.role = 'ADMIN'"
 
-    app.save(col)
+    app.save(collection)
   },
   (app) => {
-    const col = app.findCollectionByNameOrId('users')
-    if (col.fields.getByName('role')) col.fields.removeByName('role')
-    if (col.fields.getByName('phone')) col.fields.removeByName('phone')
-    if (col.fields.getByName('cpf')) col.fields.removeByName('cpf')
-    if (col.fields.getByName('teamId')) col.fields.removeByName('teamId')
-    if (col.fields.getByName('gymId')) col.fields.removeByName('gymId')
-    if (col.fields.getByName('professor')) col.fields.removeByName('professor')
+    const collection = app.findCollectionByNameOrId('users')
 
-    const passField = col.fields.getByName('password')
-    if (passField) {
-      passField.min = 8
-    }
+    collection.listRule = null
+    collection.viewRule = null
+    collection.createRule = null
+    collection.updateRule = null
+    collection.deleteRule = null
 
-    app.save(col)
+    app.save(collection)
   },
 )

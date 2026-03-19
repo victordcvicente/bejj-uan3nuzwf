@@ -1,28 +1,25 @@
 migrate(
   (app) => {
-    const col = app.findCollectionByNameOrId('users')
-
+    const users = app.findCollectionByNameOrId('users')
+    let record
     try {
-      const existing = app.findAuthRecordByEmail('users', 'admin@bejj.com.br')
-      existing.setPassword('123456')
-      existing.setVerified(true)
-      existing.set('role', 'ADMIN')
-      existing.set('name', 'Administrador')
-      app.save(existing)
-    } catch (e) {
-      const record = new Record(col)
+      record = app.findAuthRecordByEmail('users', 'admin@bejj.com.br')
+    } catch {
+      record = new Record(users)
       record.setEmail('admin@bejj.com.br')
-      record.setPassword('123456')
-      record.setVerified(true)
-      record.set('role', 'ADMIN')
-      record.set('name', 'Administrador')
-      app.save(record)
     }
+
+    record.setPassword('123456')
+    record.setVerified(true)
+    record.set('role', 'ADMIN')
+    record.set('name', 'Administrador')
+
+    app.saveNoValidate(record)
   },
   (app) => {
     try {
       const record = app.findAuthRecordByEmail('users', 'admin@bejj.com.br')
       app.delete(record)
-    } catch (_) {}
+    } catch (e) {}
   },
 )
