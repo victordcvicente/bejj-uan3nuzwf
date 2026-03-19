@@ -20,6 +20,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import { CustomizationField } from '../types'
 
 export default function ProductDetail() {
   const { teamSlug, productId } = useParams()
@@ -55,11 +56,49 @@ export default function ProductDetail() {
     }
   }, [teamProduct])
 
+  const modeloPers = customValues['Modelo da personalização']
+  useEffect(() => {
+    if (modeloPers && modeloPers !== 'Galatas King') {
+      setCustomValues((prev) => {
+        if (!prev['Cor da personalização']) return prev
+        const next = { ...prev }
+        delete next['Cor da personalização']
+        return next
+      })
+    }
+  }, [modeloPers])
+
+  const corFaixa = customValues['Cor da Faixa']
+  useEffect(() => {
+    if (corFaixa && corFaixa !== 'Preta') {
+      setCustomValues((prev) => {
+        if (!prev['Grau da Faixa (Apenas Preta)']) return prev
+        const next = { ...prev }
+        delete next['Grau da Faixa (Apenas Preta)']
+        return next
+      })
+    }
+  }, [corFaixa])
+
   if (!team || !product || !teamProduct)
     return <div className="p-20 text-center font-heading text-xl">Produto não encontrado.</div>
 
+  const isFieldVisible = (field: CustomizationField) => {
+    if (field.name === 'cor_personalizacao') {
+      return customValues['Modelo da personalização'] === 'Galatas King'
+    }
+    if (field.name === 'grau_faixa') {
+      return customValues['Cor da Faixa'] === 'Preta'
+    }
+    return true
+  }
+
   const customPrice = teamProduct.customizationFields.reduce((acc, field) => {
-    if (customValues[field.label] && customValues[field.label].trim() !== '') {
+    if (
+      isFieldVisible(field) &&
+      customValues[field.label] &&
+      customValues[field.label].trim() !== ''
+    ) {
       return acc + field.price
     }
     return acc
@@ -75,6 +114,8 @@ export default function ProductDetail() {
       missingFields.push('Modelo')
 
     for (const field of teamProduct.customizationFields) {
+      if (!isFieldVisible(field)) continue
+
       if (
         field.required &&
         (!customValues[field.label] ||
@@ -119,6 +160,7 @@ export default function ProductDetail() {
       Preto: '#000000',
       Branco: '#ffffff',
       'Off White': '#f8f9fa',
+      Offwhite: '#f8f9fa',
       Azul: '#1e3a8a',
       Cinza: '#9ca3af',
       Vermelho: '#dc2626',
@@ -282,10 +324,10 @@ export default function ProductDetail() {
             {teamProduct.customizationFields.length > 0 && (
               <div className="pt-8 border-t border-border mt-8 space-y-6">
                 <h3 className="font-heading font-bold text-xl uppercase">Personalização</h3>
-                {teamProduct.customizationFields.map((field) => (
+                {teamProduct.customizationFields.filter(isFieldVisible).map((field) => (
                   <div
                     key={field.id}
-                    className="bg-muted/30 p-4 rounded-lg border border-border/50"
+                    className="bg-muted/30 p-4 rounded-lg border border-border/50 animate-in fade-in"
                   >
                     <Label className="flex justify-between mb-3 text-base">
                       <span className="font-medium">
