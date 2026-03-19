@@ -59,6 +59,16 @@ export default function Checkout() {
   const handleFinish = async () => {
     setLoading(true)
     try {
+      let b64Receipt = ''
+      if (receipt) {
+        b64Receipt = await new Promise<string>((res, rej) => {
+          const r = new FileReader()
+          r.onload = () => res(r.result as string)
+          r.onerror = rej
+          r.readAsDataURL(receipt)
+        })
+      }
+
       await addOrder({
         userId: 'u1',
         customerName: name,
@@ -70,7 +80,7 @@ export default function Checkout() {
         total,
         paymentStatus: 'PENDING',
         productionStatus: 'PENDING',
-        receiptUrl: receipt ? URL.createObjectURL(receipt) : undefined,
+        receiptUrl: b64Receipt, // Salva o base64 para persistência real no text field
       })
 
       clearCart()

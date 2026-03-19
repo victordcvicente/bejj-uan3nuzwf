@@ -15,6 +15,7 @@ export type Gym = {
   teamId: string
   name: string
   address: string
+  email?: string
 }
 
 export type Product = {

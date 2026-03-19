@@ -27,17 +27,17 @@ export function GymsTab() {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [form, setForm] = useState({ name: '', teamId: '', address: '' })
+  const [form, setForm] = useState({ name: '', teamId: '', address: '', email: '' })
 
   const handleEdit = (g: any) => {
     setEditingId(g.id)
-    setForm({ name: g.name, teamId: g.teamId, address: g.address })
+    setForm({ name: g.name, teamId: g.teamId, address: g.address, email: g.email || '' })
     setOpen(true)
   }
 
   const handleNew = () => {
     setEditingId(null)
-    setForm({ name: '', teamId: '', address: '' })
+    setForm({ name: '', teamId: '', address: '', email: '' })
     setOpen(true)
   }
 
@@ -75,6 +75,7 @@ export function GymsTab() {
             <TableHead>Academia</TableHead>
             <TableHead>Equipe Vinculada</TableHead>
             <TableHead>Endereço de Entrega</TableHead>
+            <TableHead>E-mail (Notificações)</TableHead>
             <TableHead className="text-right">Ações</TableHead>
           </TableRow>
         </TableHeader>
@@ -86,6 +87,7 @@ export function GymsTab() {
                 <TableCell className="font-medium">{g.name}</TableCell>
                 <TableCell>{team?.name}</TableCell>
                 <TableCell className="text-muted-foreground">{g.address}</TableCell>
+                <TableCell className="text-muted-foreground">{g.email || '-'}</TableCell>
                 <TableCell className="text-right">
                   <Button variant="ghost" size="sm" onClick={() => handleEdit(g)}>
                     <Edit className="w-4 h-4" />
@@ -139,6 +141,19 @@ export function GymsTab() {
                 value={form.address}
                 onChange={(e) => setForm({ ...form, address: e.target.value })}
               />
+            </div>
+            <div className="grid gap-2">
+              <Label>E-mail de Notificação de Pedidos</Label>
+              <Input
+                type="email"
+                placeholder="contato@academia.com.br"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+              />
+              <span className="text-[10px] text-muted-foreground">
+                Este e-mail receberá notificações com comprovantes quando alunos finalizarem
+                compras.
+              </span>
             </div>
             <Button onClick={handleSave} disabled={loading} className="mt-4">
               {loading ? 'Salvando...' : 'Salvar'}

@@ -13,7 +13,30 @@ import {
 } from '@/components/ui/table'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
-import { Edit, Trash, PlusCircle } from 'lucide-react'
+import { Edit, Trash, PlusCircle, Upload } from 'lucide-react'
+
+const resizeImg = (f: File, maxW = 800): Promise<string> =>
+  new Promise((res) => {
+    const r = new FileReader()
+    r.onload = (e) => {
+      const i = new Image()
+      i.onload = () => {
+        const c = document.createElement('canvas')
+        let w = i.width,
+          h = i.height
+        if (w > maxW) {
+          h = Math.round((h * maxW) / w)
+          w = maxW
+        }
+        c.width = w
+        c.height = h
+        c.getContext('2d')?.drawImage(i, 0, 0, w, h)
+        res(c.toDataURL('image/jpeg', 0.8))
+      }
+      i.src = e.target?.result as string
+    }
+    r.readAsDataURL(f)
+  })
 
 export function TeamsTab() {
   const { teams, addTeam, updateTeam, deleteTeam } = useStore()
@@ -68,6 +91,20 @@ export function TeamsTab() {
     }
   }
 
+  const handleUploadLogo = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0]
+    if (!f) return
+    const b64 = await resizeImg(f, 400)
+    setForm({ ...form, logo: b64 })
+  }
+
+  const handleUploadCover = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0]
+    if (!f) return
+    const b64 = await resizeImg(f, 1200)
+    setForm({ ...form, coverImage: b64 })
+  }
+
   return (
     <Card>
       <div className="flex justify-between items-center p-4 border-b">
@@ -90,11 +127,15 @@ export function TeamsTab() {
           {teams.map((t) => (
             <TableRow key={t.id}>
               <TableCell>
-                <img
-                  src={t.logo}
-                  alt=""
-                  className="w-8 h-8 rounded-full border bg-white object-contain"
-                />
+                {t.logo ? (
+                  <img
+                    src={t.logo}
+                    alt=""
+                    className="w-8 h-8 rounded-full border bg-white object-contain"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full border bg-muted" />
+                )}
               </TableCell>
               <TableCell className="font-medium">{t.name}</TableCell>
               <TableCell className="text-muted-foreground">/{t.slug}</TableCell>
@@ -151,18 +192,40 @@ export function TeamsTab() {
               />
             </div>
             <div className="grid gap-2">
-              <Label>URL do Logo</Label>
-              <Input
-                value={form.logo}
-                onChange={(e) => setForm({ ...form, logo: e.target.value })}
-              />
+              <Label>Logo da Equipe</Label>
+              {form.logo && (
+                <img
+                  src={form.logo}
+                  className="w-16 h-16 object-contain border bg-white rounded-md mb-2"
+                  alt="Logo preview"
+                />
+              )}
+              <div className="flex items-center gap-2">
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleUploadLogo}
+                  className="cursor-pointer"
+                />
+              </div>
             </div>
             <div className="grid gap-2">
-              <Label>URL da Capa</Label>
-              <Input
-                value={form.coverImage}
-                onChange={(e) => setForm({ ...form, coverImage: e.target.value })}
-              />
+              <Label>Imagem de Capa (Background)</Label>
+              {form.coverImage && (
+                <img
+                  src={form.coverImage}
+                  className="w-full h-24 object-cover border rounded-md mb-2"
+                  alt="Cover preview"
+                />
+              )}
+              <div className="flex items-center gap-2">
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleUploadCover}
+                  className="cursor-pointer"
+                />
+              </div>
             </div>
             <div className="grid gap-2">
               <Label>Descrição</Label>
