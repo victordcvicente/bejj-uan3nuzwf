@@ -101,18 +101,24 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const addOrder = async (order: Partial<Order>) => {
     const { id, ...data } = order
-    const payload = { ...data } as Record<string, any>
+    const formData = new FormData()
 
-    // Ensure we don't send empty strings, nulls, or invalid strings for any fields,
-    // avoiding PocketBase 400 validation errors (especially on relation fields).
-    Object.keys(payload).forEach((key) => {
-      const val = payload[key]
+    // Ensure we don't send empty strings, nulls, or invalid strings for any fields.
+    // Also parse objects into JSON strings and append File objects correctly for multipart upload.
+    Object.keys(data).forEach((key) => {
+      const val = (data as any)[key]
       if (val === '' || val === null || val === undefined || val === 'none') {
-        delete payload[key]
+        // Skip entirely
+      } else if (val instanceof File) {
+        formData.append(key, val)
+      } else if (typeof val === 'object') {
+        formData.append(key, JSON.stringify(val))
+      } else {
+        formData.append(key, String(val))
       }
     })
 
-    return await pb.collection('orders').create(payload)
+    return await pb.collection('orders').create(formData)
   }
 
   const updateOrderStatus = async (id: string, status: Order['productionStatus']) => {

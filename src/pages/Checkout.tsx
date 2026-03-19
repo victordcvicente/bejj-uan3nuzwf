@@ -69,16 +69,6 @@ export default function Checkout() {
   const handleFinish = async () => {
     setLoading(true)
     try {
-      let b64Receipt = ''
-      if (receipt) {
-        b64Receipt = await new Promise<string>((res, rej) => {
-          const r = new FileReader()
-          r.onload = () => res(r.result as string)
-          r.onerror = rej
-          r.readAsDataURL(receipt)
-        })
-      }
-
       const payload: any = {
         userId: user?.id || 'guest',
         customerName: name.trim(),
@@ -90,8 +80,8 @@ export default function Checkout() {
         productionStatus: 'PENDING',
       }
 
-      if (b64Receipt) {
-        payload.receiptUrl = b64Receipt
+      if (receipt) {
+        payload.receiptUrl = receipt // Assina o File object direto para ser tratado pelo FormData no store
       }
 
       if (teamId && teamId !== 'none') {

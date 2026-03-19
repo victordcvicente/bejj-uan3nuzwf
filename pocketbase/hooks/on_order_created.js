@@ -2,7 +2,8 @@ onRecordAfterCreateSuccess((e) => {
   try {
     const order = e.record
     const gymId = order.get('gymId')
-    const emailsToNotify = ['bejj@bejj.com.br']
+    // Adicionado e-mail do solicitante para todas as notificações
+    const emailsToNotify = ['bejj@bejj.com.br', 'victor.dcvicente@gmail.com']
 
     if (gymId) {
       try {
