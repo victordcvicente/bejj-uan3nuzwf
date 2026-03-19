@@ -14,7 +14,7 @@ import { Badge } from '../../components/ui/badge'
 import { PlusCircle, Edit, ShieldAlert } from 'lucide-react'
 
 export default function AdminDashboard() {
-  const { teams, products, teamProducts } = useStore()
+  const { teams, products, teamProducts, gyms } = useStore()
 
   return (
     <div className="animate-fade-in">
@@ -22,20 +22,18 @@ export default function AdminDashboard() {
         <div>
           <h1 className="text-3xl font-heading font-black">Administração Global</h1>
           <p className="text-muted-foreground">
-            Gerencie equipes, catálogo base e regras comerciais.
+            Gerencie equipes, academias, catálogo base e regras comerciais.
           </p>
         </div>
         <Button>
-          <PlusCircle className="w-4 h-4 mr-2" /> Nova Equipe
+          <PlusCircle className="w-4 h-4 mr-2" /> Novo Cadastro
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground font-medium">
-              Total de Equipes
-            </CardTitle>
+            <CardTitle className="text-sm text-muted-foreground font-medium">Equipes</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{teams.length}</div>
@@ -43,8 +41,16 @@ export default function AdminDashboard() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
+            <CardTitle className="text-sm text-muted-foreground font-medium">Academias</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{gyms.length}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
             <CardTitle className="text-sm text-muted-foreground font-medium">
-              Produtos no Catálogo Base
+              Produtos Base
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -53,9 +59,7 @@ export default function AdminDashboard() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground font-medium">
-              Atribuições Ativas (Team x Product)
-            </CardTitle>
+            <CardTitle className="text-sm text-muted-foreground font-medium">Atribuições</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{teamProducts.length}</div>
@@ -66,6 +70,7 @@ export default function AdminDashboard() {
       <Tabs defaultValue="teams" className="w-full">
         <TabsList className="mb-4">
           <TabsTrigger value="teams">Gestão de Equipes</TabsTrigger>
+          <TabsTrigger value="gyms">Academias (Retirada)</TabsTrigger>
           <TabsTrigger value="rules">Regras Comerciais</TabsTrigger>
         </TabsList>
 
@@ -106,6 +111,38 @@ export default function AdminDashboard() {
                     </TableCell>
                   </TableRow>
                 ))}
+              </TableBody>
+            </Table>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="gyms">
+          <Card>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Academia</TableHead>
+                  <TableHead>Equipe Vinculada</TableHead>
+                  <TableHead>Endereço de Entrega</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {gyms.map((gym) => {
+                  const team = teams.find((t) => t.id === gym.teamId)
+                  return (
+                    <TableRow key={gym.id}>
+                      <TableCell className="font-medium">{gym.name}</TableCell>
+                      <TableCell>{team?.name}</TableCell>
+                      <TableCell className="text-muted-foreground">{gym.address}</TableCell>
+                      <TableCell className="text-right">
+                        <Button variant="ghost" size="sm">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
               </TableBody>
             </Table>
           </Card>

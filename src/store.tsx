@@ -1,9 +1,16 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react'
-import { Team, Product, TeamProduct, Order, CartItem } from './types'
-import { MOCK_TEAMS, MOCK_PRODUCTS, MOCK_TEAM_PRODUCTS, MOCK_ORDERS } from './lib/mockData'
+import { Team, Product, TeamProduct, Order, CartItem, Gym } from './types'
+import {
+  MOCK_TEAMS,
+  MOCK_PRODUCTS,
+  MOCK_TEAM_PRODUCTS,
+  MOCK_ORDERS,
+  MOCK_GYMS,
+} from './lib/mockData'
 
 interface StoreContextType {
   teams: Team[]
+  gyms: Gym[]
   products: Product[]
   teamProducts: TeamProduct[]
   orders: Order[]
@@ -20,6 +27,7 @@ const StoreContext = createContext<StoreContextType | undefined>(undefined)
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [teams] = useState<Team[]>(MOCK_TEAMS)
+  const [gyms] = useState<Gym[]>(MOCK_GYMS)
   const [products] = useState<Product[]>(MOCK_PRODUCTS)
   const [teamProducts] = useState<TeamProduct[]>(MOCK_TEAM_PRODUCTS)
   const [orders, setOrders] = useState<Order[]>(MOCK_ORDERS)
@@ -53,6 +61,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     <StoreContext.Provider
       value={{
         teams,
+        gyms,
         products,
         teamProducts,
         orders,

@@ -1,19 +1,33 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useStore } from '../store'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { Label } from '../components/ui/label'
 import { Card, CardContent } from '../components/ui/card'
-import { CheckCircle2, QrCode, CreditCard } from 'lucide-react'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select'
+import { CheckCircle2, QrCode } from 'lucide-react'
 
 export default function Checkout() {
-  const { cart, clearCart, addOrder } = useStore()
+  const { cart, clearCart, addOrder, teams, gyms } = useStore()
   const navigate = useNavigate()
   const [step, setStep] = useState(1)
   const [name, setName] = useState('')
+  const [selectedGym, setSelectedGym] = useState('')
+  const [receipt, setReceipt] = useState<File | null>(null)
 
   const total = cart.reduce((acc, item) => acc + item.price * item.quantity, 0)
+
+  // Find available gyms based on the team of the items in the cart
+  const cartTeamName = cart[0]?.teamName
+  const teamId = teams.find((t) => t.name === cartTeamName)?.id
+  const availableGyms = gyms.filter((g) => g.teamId === teamId)
 
   if (cart.length === 0 && step !== 4) {
     return (
@@ -32,12 +46,14 @@ export default function Checkout() {
       id: orderId,
       userId: 'u1',
       customerName: name || 'Visitante',
-      teamId: cart[0]?.teamName || 't1', // Simplification
+      teamId: teamId || 't1',
+      gymId: selectedGym,
       items: [...cart],
       total,
-      paymentStatus: 'PAID', // Simulating successful immediate payment for demo
+      paymentStatus: 'PENDING', // Payment is pending until receipt verification
       productionStatus: 'PENDING',
       createdAt: new Date().toISOString(),
+      receiptUrl: receipt ? URL.createObjectURL(receipt) : undefined, // Mock URL
     })
     clearCart()
     setStep(4)
@@ -91,31 +107,44 @@ export default function Checkout() {
           {step === 2 && (
             <Card className="animate-fade-in-up">
               <CardContent className="p-6 space-y-4">
-                <h2 className="text-xl font-bold mb-4">Entrega</h2>
-                <div className="flex gap-4">
-                  <div className="flex-1">
-                    <Label>CEP</Label>
-                    <Input placeholder="00000-000" />
-                  </div>
-                  <div className="flex items-end">
-                    <Button variant="outline">Buscar</Button>
-                  </div>
+                <h2 className="text-xl font-bold mb-4">Retirada na Academia</h2>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Selecione a unidade onde deseja retirar seu pedido. Os produtos serão entregues no
+                  endereço da academia selecionada.
+                </p>
+                <div>
+                  <Label>Selecione a Academia</Label>
+                  <Select value={selectedGym} onValueChange={setSelectedGym}>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Escolha uma unidade..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableGyms.map((g) => (
+                        <SelectItem key={g.id} value={g.id}>
+                          {g.name}
+                        </SelectItem>
+                      ))}
+                      {availableGyms.length === 0 && (
+                        <SelectItem value="none" disabled>
+                          Nenhuma academia encontrada
+                        </SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
                 </div>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="col-span-2">
-                    <Label>Rua</Label>
-                    <Input placeholder="Avenida Paulista" />
+                {selectedGym && (
+                  <div className="p-4 bg-muted/50 rounded-lg text-sm border border-border mt-4">
+                    <span className="font-bold block mb-1">Endereço de Entrega:</span>
+                    <span className="text-muted-foreground">
+                      {gyms.find((g) => g.id === selectedGym)?.address}
+                    </span>
                   </div>
-                  <div>
-                    <Label>Número</Label>
-                    <Input placeholder="1000" />
-                  </div>
-                </div>
-                <div className="flex gap-4">
+                )}
+                <div className="flex gap-4 pt-4">
                   <Button variant="ghost" onClick={() => setStep(1)}>
                     Voltar
                   </Button>
-                  <Button className="flex-1" onClick={() => setStep(3)}>
+                  <Button className="flex-1" disabled={!selectedGym} onClick={() => setStep(3)}>
                     Continuar para Pagamento
                   </Button>
                 </div>
@@ -126,42 +155,52 @@ export default function Checkout() {
           {step === 3 && (
             <Card className="animate-fade-in-up">
               <CardContent className="p-6">
-                <h2 className="text-xl font-bold mb-6">Pagamento</h2>
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div className="border-2 border-primary rounded-lg p-4 flex flex-col items-center justify-center gap-2 cursor-pointer bg-primary/5">
-                    <QrCode className="w-8 h-8 text-primary" />
-                    <span className="font-bold">PIX</span>
-                    <span className="text-xs text-green-600">-5% desconto</span>
-                  </div>
-                  <div className="border-2 border-muted rounded-lg p-4 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-primary/50">
-                    <CreditCard className="w-8 h-8 text-muted-foreground" />
-                    <span className="font-medium text-muted-foreground">Cartão</span>
-                  </div>
-                </div>
-                <div className="bg-muted/50 p-6 rounded-lg text-center mb-6">
-                  <img
-                    src="https://img.usecurling.com/i?q=qrcode&color=black&shape=fill"
-                    alt="PIX"
-                    className="w-32 h-32 mx-auto mb-4 opacity-50 mix-blend-multiply"
-                  />
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Escaneie o QR Code ou copie o código abaixo
+                <h2 className="text-xl font-bold mb-6">Pagamento via PIX</h2>
+
+                <div className="bg-muted/30 p-6 rounded-lg text-center mb-6 border border-border">
+                  <QrCode className="w-40 h-40 mx-auto mb-4 text-primary" />
+                  <p className="text-sm text-muted-foreground mb-4 font-medium">
+                    Escaneie o QR Code ou copie a chave PIX abaixo
                   </p>
+                  <Label className="block text-left mb-1 text-xs">Chave PIX (CNPJ)</Label>
                   <Input
                     readOnly
-                    value="00020126360014BR.GOV.BCB.PIX0114+5511999999999..."
-                    className="text-xs font-mono text-center"
+                    value="12.345.678/0001-90"
+                    className="font-mono text-center font-bold bg-background"
                   />
                 </div>
+
+                <div className="space-y-3 mb-8 p-4 border border-primary/20 bg-primary/5 rounded-lg">
+                  <Label className="text-base font-bold text-primary">
+                    Comprovante de Pagamento
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Para confirmar seu pedido, realize o pagamento via PIX e anexe o comprovante
+                    abaixo.
+                  </p>
+                  <Input
+                    type="file"
+                    accept="image/*,.pdf"
+                    onChange={(e) => setReceipt(e.target.files?.[0] || null)}
+                    className="bg-background cursor-pointer file:cursor-pointer"
+                  />
+                  {!receipt && (
+                    <p className="text-xs text-destructive font-medium mt-1">
+                      * O comprovante é obrigatório para finalizar o pedido.
+                    </p>
+                  )}
+                </div>
+
                 <div className="flex gap-4">
                   <Button variant="ghost" onClick={() => setStep(2)}>
                     Voltar
                   </Button>
                   <Button
                     className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold"
+                    disabled={!receipt}
                     onClick={handleFinish}
                   >
-                    Simular Pagamento Aprovado
+                    Finalizar Pedido
                   </Button>
                 </div>
               </CardContent>
@@ -173,9 +212,10 @@ export default function Checkout() {
               <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
                 <CheckCircle2 className="w-10 h-10" />
               </div>
-              <h2 className="text-3xl font-heading font-black mb-4">Pedido Confirmado!</h2>
+              <h2 className="text-3xl font-heading font-black mb-4">Pedido Enviado!</h2>
               <p className="text-muted-foreground mb-8">
-                Recebemos seu pedido e ele já está na fila de produção da sua equipe.
+                Recebemos seu pedido e o comprovante de pagamento. Ele já está na fila de
+                conferência e produção.
               </p>
               <Button asChild>
                 <Link to="/tracking">Acompanhar Pedido</Link>
@@ -215,6 +255,3 @@ export default function Checkout() {
     </div>
   )
 }
-
-// Ensure Link is imported for step 4
-import { Link } from 'react-router-dom'

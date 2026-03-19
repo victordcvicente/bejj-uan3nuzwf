@@ -7,6 +7,13 @@ export type Team = {
   coverImage: string
 }
 
+export type Gym = {
+  id: string
+  teamId: string
+  name: string
+  address: string
+}
+
 export type Product = {
   id: string
   name: string
@@ -59,9 +66,11 @@ export type Order = {
   userId: string
   customerName: string
   teamId: string
+  gymId?: string
   items: CartItem[]
   total: number
   paymentStatus: PaymentStatus
   productionStatus: OrderStatus
   createdAt: string
+  receiptUrl?: string
 }

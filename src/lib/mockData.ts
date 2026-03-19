@@ -1,4 +1,4 @@
-import { Team, Product, TeamProduct, Order } from '../types'
+import { Team, Product, TeamProduct, Order, Gym } from '../types'
 
 export const MOCK_TEAMS: Team[] = [
   {
@@ -8,6 +8,21 @@ export const MOCK_TEAMS: Team[] = [
     logo: 'https://img.usecurling.com/i?q=lion&color=solid-black&shape=fill',
     primaryColor: 'bg-neutral-900',
     coverImage: 'https://img.usecurling.com/p/1200/400?q=jiu%20jitsu%20training%20gym&color=black',
+  },
+]
+
+export const MOCK_GYMS: Gym[] = [
+  {
+    id: 'g1',
+    teamId: 't1',
+    name: 'Gálatas - Matriz',
+    address: 'Av. das Lutas, 100 - Centro',
+  },
+  {
+    id: 'g2',
+    teamId: 't1',
+    name: 'Gálatas - Filial Sul',
+    address: 'Rua do Tatame, 450 - Zona Sul',
   },
 ]
 
@@ -103,7 +118,7 @@ export const MOCK_TEAM_PRODUCTS: TeamProduct[] = [
     productId: 'p4',
     price: 129.9,
     sizes: [],
-    colors: ['Branco'],
+    colors: ['Branco', 'Preto'],
     inStock: true,
     customizationFields: [
       {
@@ -128,7 +143,7 @@ export const MOCK_TEAM_PRODUCTS: TeamProduct[] = [
         name: 'grau_faixa',
         label: 'Grau da Faixa (Apenas Preta)',
         type: 'select' as const,
-        options: ['I', 'II', 'IV'],
+        options: ['I', 'II', 'III', 'IV'],
         required: true,
         price: 0,
       },
