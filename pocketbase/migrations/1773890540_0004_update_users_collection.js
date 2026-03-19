@@ -2,22 +2,23 @@ migrate(
   (app) => {
     const usersCol = app.findCollectionByNameOrId('users')
 
-    // Role field is not yet created at this point, so keep rules simple.
-    // Complex RBAC rules are added in later migrations once the field exists.
-    usersCol.createRule = ''
-
-    // Set basic safe rules if they weren't set
-    if (!usersCol.listRule) usersCol.listRule = "@request.auth.id != ''"
-    if (!usersCol.viewRule) usersCol.viewRule = "@request.auth.id != ''"
-    if (!usersCol.updateRule) usersCol.updateRule = 'id = @request.auth.id'
-    if (!usersCol.deleteRule) usersCol.deleteRule = 'id = @request.auth.id'
+    // Fix invalid @request.data.role left operand by using @request.auth or standard rules
+    usersCol.listRule = "@request.auth.id = id || @request.auth.role = 'ADMIN'"
+    usersCol.viewRule = "@request.auth.id = id || @request.auth.role = 'ADMIN'"
+    usersCol.createRule = "@request.auth.role = 'ADMIN' || @request.auth.id = ''"
+    usersCol.updateRule = "@request.auth.id = id || @request.auth.role = 'ADMIN'"
+    usersCol.deleteRule = "@request.auth.id = id || @request.auth.role = 'ADMIN'"
 
     app.save(usersCol)
   },
   (app) => {
     const usersCol = app.findCollectionByNameOrId('users')
 
-    usersCol.createRule = ''
+    usersCol.listRule = null
+    usersCol.viewRule = null
+    usersCol.createRule = null
+    usersCol.updateRule = null
+    usersCol.deleteRule = null
 
     app.save(usersCol)
   },
