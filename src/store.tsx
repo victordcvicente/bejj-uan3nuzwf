@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { Team, Product, TeamProduct, Order, CartItem, Gym } from './types'
+import { Team, Product, TeamProduct, Order, CartItem, Gym, Role } from './types'
 import {
   MOCK_TEAMS,
   MOCK_PRODUCTS,
@@ -9,6 +9,8 @@ import {
 } from './lib/mockData'
 
 interface StoreContextType {
+  role: Role
+  setRole: (role: Role) => void
   teams: Team[]
   gyms: Gym[]
   products: Product[]
@@ -51,6 +53,7 @@ function loadData<T>(key: string, fallback: T): T {
 }
 
 export function StoreProvider({ children }: { children: ReactNode }) {
+  const [role, setRole] = useState<Role>(() => loadData('bejj_role', 'ADMIN'))
   const [teams, setTeams] = useState<Team[]>(() => loadData('bejj_teams', MOCK_TEAMS))
   const [gyms, setGyms] = useState<Gym[]>(() => loadData('bejj_gyms', MOCK_GYMS))
   const [products, setProducts] = useState<Product[]>(() =>
@@ -63,12 +66,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([])
 
   useEffect(() => {
+    localStorage.setItem('bejj_role', JSON.stringify(role))
     localStorage.setItem('bejj_teams', JSON.stringify(teams))
     localStorage.setItem('bejj_gyms', JSON.stringify(gyms))
     localStorage.setItem('bejj_products', JSON.stringify(products))
     localStorage.setItem('bejj_teamProducts', JSON.stringify(teamProducts))
     localStorage.setItem('bejj_orders', JSON.stringify(orders))
-  }, [teams, gyms, products, teamProducts, orders])
+  }, [role, teams, gyms, products, teamProducts, orders])
 
   const addToCart = (item: CartItem) => setCart((prev) => [...prev, item])
   const removeFromCart = (id: string) => setCart((prev) => prev.filter((i) => i.id !== id))
@@ -103,6 +107,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   return (
     <StoreContext.Provider
       value={{
+        role,
+        setRole,
         teams,
         gyms,
         products,

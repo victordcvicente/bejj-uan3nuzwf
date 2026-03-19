@@ -1,15 +1,26 @@
-import { Outlet, useLocation } from 'react-router-dom'
+import { Outlet, useLocation, Navigate } from 'react-router-dom'
 import { Header } from './Header'
 import { Footer } from './Footer'
 import { SidebarNav } from './SidebarNav'
 import { BottomNav } from './BottomNav'
+import { useStore } from '@/store'
 
 export function Layout() {
   const location = useLocation()
-  const isAdminArea =
-    location.pathname.startsWith('/admin') ||
-    location.pathname.startsWith('/production') ||
-    location.pathname.startsWith('/professor')
+  const { role } = useStore()
+
+  const isAdminPath = location.pathname.startsWith('/admin')
+  const isProductionPath = location.pathname.startsWith('/production')
+  const isProfessorPath = location.pathname.startsWith('/professor')
+
+  const isAdminArea = isAdminPath || isProductionPath || isProfessorPath
+
+  // Access validation based on roles
+  if (isAdminPath && role !== 'ADMIN') return <Navigate to="/" replace />
+  if (isProductionPath && role !== 'ADMIN' && role !== 'PRODUCTION')
+    return <Navigate to="/" replace />
+  if (isProfessorPath && role !== 'ADMIN' && role !== 'PROFESSOR')
+    return <Navigate to="/" replace />
 
   if (isAdminArea) {
     return (

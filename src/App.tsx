@@ -4,6 +4,7 @@ import { Toaster as Sonner } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { StoreProvider } from '@/store'
 import { Layout } from '@/components/Layout'
+import { RoleSwitcher } from '@/components/RoleSwitcher'
 
 import Index from '@/pages/Index'
 import TeamHome from '@/pages/TeamHome'
@@ -24,6 +25,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
+        <RoleSwitcher />
         <Routes>
           <Route element={<Layout />}>
             <Route path="/" element={<Index />} />

@@ -1,3 +1,5 @@
+export type Role = 'ADMIN' | 'PRODUCTION' | 'PROFESSOR' | 'STUDENT'
+
 export type Team = {
   id: string
   slug: string
@@ -66,6 +68,8 @@ export type Order = {
   id: string
   userId: string
   customerName: string
+  customerEmail?: string
+  customerCpf?: string
   teamId: string
   gymId?: string
   items: CartItem[]

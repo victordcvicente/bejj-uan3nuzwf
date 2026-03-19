@@ -3,16 +3,68 @@ import { Link } from 'react-router-dom'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Search, ChevronRight, Shield, MapPin } from 'lucide-react'
+import { Search, ChevronRight, Shield, MapPin, Edit, Upload } from 'lucide-react'
 import { useStore } from '@/store'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+
+const resizeImg = (f: File): Promise<string> =>
+  new Promise((res) => {
+    const r = new FileReader()
+    r.onload = (e) => {
+      const i = new Image()
+      i.onload = () => {
+        const c = document.createElement('canvas')
+        let w = i.width,
+          h = i.height
+        if (w > 800) {
+          h = Math.round((h * 800) / w)
+          w = 800
+        }
+        c.width = w
+        c.height = h
+        c.getContext('2d')?.drawImage(i, 0, 0, w, h)
+        res(c.toDataURL('image/jpeg', 0.7))
+      }
+      i.src = e.target?.result as string
+    }
+    r.readAsDataURL(f)
+  })
 
 export default function GlobalCatalog() {
-  const { teams, gyms } = useStore()
+  const { teams, gyms, role, updateTeam } = useStore()
   const [searchTerm, setSearchTerm] = useState('')
+  const [editTeamId, setEditTeamId] = useState<string | null>(null)
+  const [form, setForm] = useState({ logo: '', coverImage: '' })
 
   const filteredTeams = teams.filter((team) =>
     team.name.toLowerCase().includes(searchTerm.toLowerCase()),
   )
+
+  const handleEdit = (e: React.MouseEvent, t: any) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setEditTeamId(t.id)
+    setForm({ logo: t.logo, coverImage: t.coverImage })
+  }
+
+  const handleSave = () => {
+    if (editTeamId) {
+      updateTeam(editTeamId, form)
+    }
+    setEditTeamId(null)
+  }
+
+  const handleUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    field: 'logo' | 'coverImage',
+  ) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const b64 = await resizeImg(file)
+      setForm((prev) => ({ ...prev, [field]: b64 }))
+    }
+  }
 
   return (
     <div className="container mx-auto px-4 py-8 animate-fade-in-up">
@@ -42,7 +94,17 @@ export default function GlobalCatalog() {
           const academiasCount = gyms.filter((g) => g.teamId === team.id).length
           return (
             <Link key={team.id} to={`/${team.slug}`}>
-              <Card className="group overflow-hidden hover:border-primary/50 transition-all hover:shadow-lg cursor-pointer h-full flex flex-col">
+              <Card className="group overflow-hidden hover:border-primary/50 transition-all hover:shadow-lg cursor-pointer h-full flex flex-col relative">
+                {role === 'ADMIN' && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="absolute top-2 right-2 z-20 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity bg-background/90 hover:bg-background"
+                    onClick={(e) => handleEdit(e, team)}
+                  >
+                    <Edit className="w-4 h-4 mr-2" /> Editar Visual
+                  </Button>
+                )}
                 <div className="h-32 w-full relative overflow-hidden bg-muted">
                   <img
                     src={team.coverImage}
@@ -75,7 +137,7 @@ export default function GlobalCatalog() {
                       size="sm"
                       className="group-hover:text-primary group-hover:translate-x-1 transition-all"
                     >
-                      Ver Catálogo <ChevronRight className="h-4 w-4 ml-1" />
+                      Acessar <ChevronRight className="h-4 w-4 ml-1" />
                     </Button>
                   </div>
                 </CardContent>
@@ -93,6 +155,62 @@ export default function GlobalCatalog() {
           </div>
         )}
       </div>
+
+      <Dialog open={!!editTeamId} onOpenChange={(open) => !open && setEditTeamId(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Personalizar Visual da Equipe</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-6 py-4">
+            <div className="space-y-2">
+              <Label>Logo da Equipe</Label>
+              <div className="flex gap-4 items-center">
+                {form.logo && (
+                  <img
+                    src={form.logo}
+                    className="w-16 h-16 rounded-full border bg-muted object-contain"
+                  />
+                )}
+                <label className="flex-1 flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-4 cursor-pointer hover:bg-muted/50 transition-colors">
+                  <Upload className="w-5 h-5 mb-2 text-muted-foreground" />
+                  <span className="text-sm font-medium">Fazer Upload do Logo</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleUpload(e, 'logo')}
+                  />
+                </label>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Imagem de Capa (Fundo)</Label>
+              <div className="flex flex-col gap-4">
+                {form.coverImage && (
+                  <img
+                    src={form.coverImage}
+                    className="w-full h-32 rounded-lg border bg-muted object-cover"
+                  />
+                )}
+                <label className="w-full flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-4 cursor-pointer hover:bg-muted/50 transition-colors">
+                  <Upload className="w-5 h-5 mb-2 text-muted-foreground" />
+                  <span className="text-sm font-medium">Fazer Upload de Capa</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleUpload(e, 'coverImage')}
+                  />
+                </label>
+              </div>
+            </div>
+            <Button onClick={handleSave} className="w-full mt-2">
+              Salvar Alterações
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

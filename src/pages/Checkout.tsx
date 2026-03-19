@@ -13,18 +13,28 @@ import {
   SelectValue,
 } from '../components/ui/select'
 import { CheckCircle2, QrCode } from 'lucide-react'
+import { useToast } from '../hooks/use-toast'
 
 export default function Checkout() {
   const { cart, clearCart, addOrder, teams, gyms } = useStore()
+  const { toast } = useToast()
   const navigate = useNavigate()
+
   const [step, setStep] = useState(1)
+
+  // Step 1 states
   const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [cpf, setCpf] = useState('')
+
+  // Step 2 states
   const [selectedGym, setSelectedGym] = useState('')
+
+  // Step 3 states
   const [receipt, setReceipt] = useState<File | null>(null)
 
   const total = cart.reduce((acc, item) => acc + item.price * item.quantity, 0)
 
-  // Find available gyms based on the team of the items in the cart
   const cartTeamName = cart[0]?.teamName
   const teamId = teams.find((t) => t.name === cartTeamName)?.id
   const availableGyms = gyms.filter((g) => g.teamId === teamId)
@@ -40,23 +50,39 @@ export default function Checkout() {
     )
   }
 
+  // Validations
+  const isStep1Valid = name.trim().length >= 3 && email.includes('@') && cpf.length >= 11
+  const isStep2Valid = selectedGym !== ''
+  const isStep3Valid = receipt !== null
+
   const handleFinish = () => {
     const orderId = `ORD-${Math.floor(Math.random() * 10000)}`
     addOrder({
       id: orderId,
       userId: 'u1',
-      customerName: name || 'Visitante',
+      customerName: name,
+      customerEmail: email,
+      customerCpf: cpf,
       teamId: teamId || 't1',
       gymId: selectedGym,
       items: [...cart],
       total,
-      paymentStatus: 'PENDING', // Payment is pending until receipt verification
+      paymentStatus: 'PENDING',
       productionStatus: 'PENDING',
       createdAt: new Date().toISOString(),
-      receiptUrl: receipt ? URL.createObjectURL(receipt) : undefined, // Mock URL
+      receiptUrl: receipt ? URL.createObjectURL(receipt) : undefined,
     })
+
     clearCart()
     setStep(4)
+
+    // Simulate email dispatch
+    toast({
+      title: 'E-mail Enviado!',
+      description:
+        'Disparamos um e-mail com os dados do pedido e o comprovante para a academia e organizadores do catálogo.',
+      variant: 'default',
+    })
   }
 
   return (
@@ -82,7 +108,9 @@ export default function Checkout() {
               <CardContent className="p-6 space-y-4">
                 <h2 className="text-xl font-bold mb-4">Identificação</h2>
                 <div>
-                  <Label>Nome Completo</Label>
+                  <Label>
+                    Nome Completo <span className="text-destructive">*</span>
+                  </Label>
                   <Input
                     value={name}
                     onChange={(e) => setName(e.target.value)}
@@ -90,14 +118,27 @@ export default function Checkout() {
                   />
                 </div>
                 <div>
-                  <Label>E-mail</Label>
-                  <Input type="email" placeholder="joao@exemplo.com" />
+                  <Label>
+                    E-mail <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="joao@exemplo.com"
+                  />
                 </div>
                 <div>
-                  <Label>CPF</Label>
-                  <Input placeholder="000.000.000-00" />
+                  <Label>
+                    CPF <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    value={cpf}
+                    onChange={(e) => setCpf(e.target.value)}
+                    placeholder="000.000.000-00"
+                  />
                 </div>
-                <Button className="w-full mt-4" onClick={() => setStep(2)}>
+                <Button className="w-full mt-4" disabled={!isStep1Valid} onClick={() => setStep(2)}>
                   Continuar para Entrega
                 </Button>
               </CardContent>
@@ -113,7 +154,9 @@ export default function Checkout() {
                   endereço da academia selecionada.
                 </p>
                 <div>
-                  <Label>Selecione a Academia</Label>
+                  <Label>
+                    Selecione a Academia <span className="text-destructive">*</span>
+                  </Label>
                   <Select value={selectedGym} onValueChange={setSelectedGym}>
                     <SelectTrigger className="mt-1">
                       <SelectValue placeholder="Escolha uma unidade..." />
@@ -144,7 +187,7 @@ export default function Checkout() {
                   <Button variant="ghost" onClick={() => setStep(1)}>
                     Voltar
                   </Button>
-                  <Button className="flex-1" disabled={!selectedGym} onClick={() => setStep(3)}>
+                  <Button className="flex-1" disabled={!isStep2Valid} onClick={() => setStep(3)}>
                     Continuar para Pagamento
                   </Button>
                 </div>
@@ -172,7 +215,7 @@ export default function Checkout() {
 
                 <div className="space-y-3 mb-8 p-4 border border-primary/20 bg-primary/5 rounded-lg">
                   <Label className="text-base font-bold text-primary">
-                    Comprovante de Pagamento
+                    Comprovante de Pagamento <span className="text-destructive">*</span>
                   </Label>
                   <p className="text-xs text-muted-foreground">
                     Para confirmar seu pedido, realize o pagamento via PIX e anexe o comprovante
@@ -186,7 +229,7 @@ export default function Checkout() {
                   />
                   {!receipt && (
                     <p className="text-xs text-destructive font-medium mt-1">
-                      * O comprovante é obrigatório para finalizar o pedido.
+                      O comprovante é obrigatório para finalizar o pedido.
                     </p>
                   )}
                 </div>
@@ -197,7 +240,7 @@ export default function Checkout() {
                   </Button>
                   <Button
                     className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold"
-                    disabled={!receipt}
+                    disabled={!isStep3Valid}
                     onClick={handleFinish}
                   >
                     Finalizar Pedido
@@ -215,7 +258,7 @@ export default function Checkout() {
               <h2 className="text-3xl font-heading font-black mb-4">Pedido Enviado!</h2>
               <p className="text-muted-foreground mb-8">
                 Recebemos seu pedido e o comprovante de pagamento. Ele já está na fila de
-                conferência e produção.
+                conferência e um e-mail de confirmação foi enviado.
               </p>
               <Button asChild>
                 <Link to="/tracking">Acompanhar Pedido</Link>
