@@ -5,6 +5,7 @@ export type Team = {
   logo: string
   primaryColor: string
   coverImage: string
+  description?: string
 }
 
 export type Gym = {

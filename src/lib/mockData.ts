@@ -1,13 +1,16 @@
 import { Team, Product, TeamProduct, Order, Gym } from '../types'
+import galatasLogo from '../assets/image-4ca2d.png'
 
 export const MOCK_TEAMS: Team[] = [
   {
     id: 't1',
     slug: 'galatas',
-    name: 'Gálatas Jiu-Jitsu',
-    logo: 'https://img.usecurling.com/i?q=lion&color=solid-black&shape=fill',
+    name: 'Gálatas BJJ',
+    logo: galatasLogo,
     primaryColor: 'bg-neutral-900',
     coverImage: 'https://img.usecurling.com/p/1200/400?q=jiu%20jitsu%20training%20gym&color=black',
+    description:
+      'A arte suave levada a sério. Junte-se à nossa equipe e tenha acesso a produtos exclusivos com a nossa marca.',
   },
 ]
 
@@ -23,6 +26,12 @@ export const MOCK_GYMS: Gym[] = [
     teamId: 't1',
     name: 'Gálatas - Filial Sul',
     address: 'Rua do Tatame, 450 - Zona Sul',
+  },
+  {
+    id: 'g3',
+    teamId: 't1',
+    name: 'Gálatas - Filial Norte',
+    address: 'Av. dos Campeões, 900 - Zona Norte',
   },
 ]
 
