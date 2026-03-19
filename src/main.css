@@ -6,8 +6,9 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 7%; /* Carbon Black */
+    /* Off-White and Black theme with Gold accent for Gálatas */
+    --background: 40 20% 97%; /* Off-white */
+    --foreground: 0 0% 7%; /* Deep Black */
 
     --card: 0 0% 100%;
     --card-foreground: 0 0% 7%;
@@ -15,46 +16,53 @@
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 7%;
 
-    --primary: 0 0% 7%; /* Carbon Black */
-    --primary-foreground: 0 0% 100%;
+    --primary: 0 0% 7%; /* Deep Black */
+    --primary-foreground: 40 20% 97%;
 
-    --secondary: 0 0% 96%;
+    --secondary: 40 10% 90%;
     --secondary-foreground: 0 0% 7%;
 
-    --muted: 0 0% 96%;
+    --muted: 40 10% 90%;
     --muted-foreground: 0 0% 40%;
 
-    --accent: 43 60% 53%; /* Electric Gold */
+    --accent: 46 65% 52%; /* Gold */
     --accent-foreground: 0 0% 7%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 0 0% 7%;
+    --border: 0 0% 85%;
+    --input: 0 0% 85%;
+    --ring: 46 65% 52%; /* Gold ring for focus */
 
     --radius: 0.5rem;
   }
 
   .dark {
     --background: 0 0% 7%;
-    --foreground: 0 0% 100%;
+    --foreground: 40 20% 97%;
+
     --card: 0 0% 10%;
-    --card-foreground: 0 0% 100%;
+    --card-foreground: 40 20% 97%;
+
     --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 100%;
-    --primary: 0 0% 100%;
+    --popover-foreground: 40 20% 97%;
+
+    --primary: 40 20% 97%;
     --primary-foreground: 0 0% 7%;
+
     --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary-foreground: 40 20% 97%;
+
     --muted: 0 0% 15%;
     --muted-foreground: 0 0% 65%;
-    --accent: 43 60% 53%;
+
+    --accent: 46 65% 52%; /* Gold */
     --accent-foreground: 0 0% 7%;
+
     --border: 0 0% 20%;
     --input: 0 0% 20%;
-    --ring: 0 0% 80%;
+    --ring: 46 65% 52%;
   }
 
   body {
@@ -73,7 +81,7 @@
 
 @layer utilities {
   .glass {
-    @apply bg-white/80 backdrop-blur-md border-b border-white/20 shadow-sm dark:bg-black/80 dark:border-white/10;
+    @apply bg-background/80 backdrop-blur-md border-b border-border/50 shadow-sm;
   }
 
   .step-active {

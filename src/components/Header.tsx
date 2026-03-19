@@ -33,11 +33,9 @@ export default function Header() {
             {activeTeam ? (
               <img src={activeTeam.logo} alt={activeTeam.name} className="h-8 w-8 object-contain" />
             ) : (
-              <span className="bg-primary text-primary-foreground p-1 rounded">BJJ</span>
+              <span className="bg-primary text-primary-foreground p-1 rounded font-bold">GLTS</span>
             )}
-            <span className="hidden sm:inline">
-              {activeTeam ? activeTeam.name : 'LIFESTYLE CO.'}
-            </span>
+            <span className="hidden sm:inline">{activeTeam ? activeTeam.name : 'GÁLATAS CO.'}</span>
           </Link>
         </div>
 
@@ -65,18 +63,24 @@ export default function Header() {
               </Button>
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="relative">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="relative hover:text-accent transition-colors"
+                  >
                     <ShoppingCart className="h-5 w-5" />
                     {cartItemsCount > 0 && (
-                      <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px] bg-accent text-accent-foreground border-none">
+                      <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px] bg-accent text-accent-foreground border-none font-bold">
                         {cartItemsCount}
                       </Badge>
                     )}
                   </Button>
                 </SheetTrigger>
-                <SheetContent className="flex flex-col w-full sm:max-w-md">
+                <SheetContent className="flex flex-col w-full sm:max-w-md border-l-0 shadow-2xl">
                   <SheetHeader>
-                    <SheetTitle>Seu Carrinho</SheetTitle>
+                    <SheetTitle className="font-heading font-black text-2xl uppercase">
+                      Seu Carrinho
+                    </SheetTitle>
                   </SheetHeader>
                   <ScrollArea className="flex-1 -mx-6 px-6 mt-4">
                     {cart.length === 0 ? (
@@ -91,10 +95,12 @@ export default function Header() {
                             <img
                               src={item.image}
                               alt={item.productName}
-                              className="h-20 w-20 object-cover rounded-md bg-muted"
+                              className="h-20 w-20 object-cover rounded-md bg-muted border border-border"
                             />
                             <div className="flex-1">
-                              <h4 className="font-semibold text-sm">{item.productName}</h4>
+                              <h4 className="font-bold text-sm leading-tight">
+                                {item.productName}
+                              </h4>
                               <p className="text-xs text-muted-foreground">{item.teamName}</p>
                               <div className="text-xs text-muted-foreground mt-1">
                                 {item.size} | {item.color}
@@ -105,8 +111,10 @@ export default function Header() {
                                 ))}
                               </div>
                               <div className="flex justify-between items-center mt-2">
-                                <span className="font-medium">R$ {item.price.toFixed(2)}</span>
-                                <span className="text-xs">Qtd: {item.quantity}</span>
+                                <span className="font-bold text-accent">
+                                  R$ {item.price.toFixed(2)}
+                                </span>
+                                <span className="text-xs font-medium">Qtd: {item.quantity}</span>
                               </div>
                             </div>
                           </div>
@@ -115,12 +123,12 @@ export default function Header() {
                     )}
                   </ScrollArea>
                   <div className="pt-6 border-t mt-auto">
-                    <div className="flex justify-between font-bold mb-4">
+                    <div className="flex justify-between font-bold text-lg mb-4">
                       <span>Total</span>
-                      <span>R$ {cartTotal.toFixed(2)}</span>
+                      <span className="text-accent">R$ {cartTotal.toFixed(2)}</span>
                     </div>
                     <Button
-                      className="w-full h-12 text-lg font-heading"
+                      className="w-full h-12 text-lg font-heading font-bold"
                       disabled={cart.length === 0}
                       onClick={() => navigate('/checkout')}
                     >
