@@ -79,19 +79,26 @@ export default function Checkout() {
         })
       }
 
-      await addOrder({
+      const payload: any = {
         userId: user?.id || 'guest',
         customerName: name,
         customerEmail: email,
         customerCpf: cpf,
-        teamId: teamId || '',
-        gymId: selectedGym === 'none' ? '' : selectedGym,
         items: [...cart],
         total,
         paymentStatus: 'PENDING',
         productionStatus: 'PENDING',
         receiptUrl: b64Receipt,
-      })
+      }
+
+      if (teamId) {
+        payload.teamId = teamId
+      }
+      if (selectedGym && selectedGym !== 'none') {
+        payload.gymId = selectedGym
+      }
+
+      await addOrder(payload)
 
       clearCart()
       setStep(4)

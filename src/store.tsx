@@ -101,8 +101,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const addOrder = async (order: Partial<Order>) => {
     const { id, ...data } = order
-    return await pb.collection('orders').create(data)
+    const payload = { ...data } as any
+
+    // Ensure we don't send empty strings for relation fields, avoiding PocketBase 400 errors
+    if (!payload.teamId) delete payload.teamId
+    if (!payload.gymId) delete payload.gymId
+
+    return await pb.collection('orders').create(payload)
   }
+
   const updateOrderStatus = async (id: string, status: Order['productionStatus']) => {
     await pb.collection('orders').update(id, { productionStatus: status })
   }
