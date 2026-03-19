@@ -1,13 +1,17 @@
 import { Link, useLocation } from 'react-router-dom'
-import { ShoppingCart, LayoutDashboard, ShieldAlert, Cog, UserCog, LogOut } from 'lucide-react'
+import { ShoppingCart, ShieldAlert, Cog, UserCog, LogOut, User } from 'lucide-react'
 import { Button } from './ui/button'
 import { Badge } from './ui/badge'
 import { useStore } from '../store'
+import { useAuth } from '@/hooks/use-auth'
 import logoUrl from '../assets/image-6d323.png'
 
 export function Header() {
-  const { cart, role } = useStore()
+  const { cart } = useStore()
+  const { user, signOut } = useAuth()
   const location = useLocation()
+
+  const role = user?.role || 'GUEST'
   const isAdminArea =
     location.pathname.startsWith('/admin') ||
     location.pathname.startsWith('/production') ||
@@ -33,6 +37,7 @@ export function Header() {
             </div>
           </div>
           <div className="flex items-center gap-4">
+            <span className="text-sm font-bold mr-2 hidden sm:inline-block">{user?.name}</span>
             <Button
               variant="ghost"
               size="sm"
@@ -75,48 +80,55 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-2 md:gap-4">
-          {role !== 'STUDENT' && (
-            <div className="hidden sm:flex gap-2">
-              {role === 'ADMIN' && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  asChild
-                  className="border-primary/20 hover:bg-primary/10"
-                >
-                  <Link to="/admin">
-                    <ShieldAlert className="w-4 h-4 mr-2 text-primary" /> Admin
-                  </Link>
-                </Button>
-              )}
-              {(role === 'ADMIN' || role === 'PRODUCTION') && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  asChild
-                  className="border-primary/20 hover:bg-primary/10"
-                >
-                  <Link to="/production">
-                    <Cog className="w-4 h-4 mr-2 text-primary" /> Produção
-                  </Link>
-                </Button>
-              )}
-              {(role === 'ADMIN' || role === 'PROFESSOR') && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  asChild
-                  className="border-primary/20 hover:bg-primary/10"
-                >
-                  <Link to="/professor">
-                    <UserCog className="w-4 h-4 mr-2 text-primary" /> Professor
-                  </Link>
-                </Button>
-              )}
-            </div>
+          <div className="hidden sm:flex gap-2 mr-2">
+            {role === 'ADMIN' && (
+              <Button variant="outline" size="sm" asChild className="border-primary/20">
+                <Link to="/admin">
+                  <ShieldAlert className="w-4 h-4 mr-2 text-primary" /> Admin
+                </Link>
+              </Button>
+            )}
+            {(role === 'ADMIN' || role === 'PRODUCTION') && (
+              <Button variant="outline" size="sm" asChild className="border-primary/20">
+                <Link to="/production">
+                  <Cog className="w-4 h-4 mr-2 text-primary" /> Produção
+                </Link>
+              </Button>
+            )}
+            {(role === 'ADMIN' || role === 'PROFESSOR') && (
+              <Button variant="outline" size="sm" asChild className="border-primary/20">
+                <Link to="/professor">
+                  <UserCog className="w-4 h-4 mr-2 text-primary" /> Professor
+                </Link>
+              </Button>
+            )}
+          </div>
+
+          {user ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                signOut()
+                window.location.href = '/'
+              }}
+              className="text-muted-foreground"
+              title="Sair da conta"
+            >
+              <span className="hidden md:inline-block mr-2 text-foreground font-bold">
+                {user.name?.split(' ')[0]}
+              </span>
+              <LogOut className="w-4 h-4" />
+            </Button>
+          ) : (
+            <Button variant="default" size="sm" asChild>
+              <Link to="/login">
+                <User className="w-4 h-4 mr-2" /> Entrar
+              </Link>
+            </Button>
           )}
 
-          <Button variant="ghost" size="icon" asChild className="relative ml-2">
+          <Button variant="ghost" size="icon" asChild className="relative ml-1">
             <Link to="/checkout">
               <ShoppingCart className="h-5 w-5" />
               {cartItemsCount > 0 && (

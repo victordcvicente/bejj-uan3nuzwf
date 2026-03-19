@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Search, ChevronRight, Shield, MapPin, Edit, Upload } from 'lucide-react'
 import { useStore } from '@/store'
+import { useAuth } from '@/hooks/use-auth'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { getErrorMessage } from '@/lib/pocketbase/errors'
@@ -57,7 +58,9 @@ const resizeImg = (f: File, initialMaxWidth = 800): Promise<string> =>
   })
 
 export default function GlobalCatalog() {
-  const { teams, gyms, role, updateTeam } = useStore()
+  const { teams, gyms, updateTeam } = useStore()
+  const { user } = useAuth()
+  const role = user?.role
   const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState('')
   const [editTeamId, setEditTeamId] = useState<string | null>(null)
@@ -99,7 +102,6 @@ export default function GlobalCatalog() {
       setLoading(true)
       try {
         const teamToUpdate = teams.find((t) => t.id === editTeamId)
-        // Ensure required fields are sent to avoid validation errors on PATCH
         const payload = {
           name: teamToUpdate?.name,
           slug: teamToUpdate?.slug,

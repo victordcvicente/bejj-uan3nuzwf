@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/ta
 import { TeamsTab } from './tabs/TeamsTab'
 import { GymsTab } from './tabs/GymsTab'
 import { TeamCatalogsTab } from './tabs/TeamCatalogsTab'
+import { UsersTab } from './tabs/UsersTab'
 
 export default function AdminDashboard() {
   const { teams, products, teamProducts, gyms } = useStore()
@@ -14,7 +15,7 @@ export default function AdminDashboard() {
         <div>
           <h1 className="text-3xl font-heading font-black">Administração Global</h1>
           <p className="text-muted-foreground">
-            Gerencie equipes, catálogos por equipe e academias vinculadas.
+            Gerencie equipes, catálogos por equipe, academias e usuários.
           </p>
         </div>
       </div>
@@ -63,6 +64,7 @@ export default function AdminDashboard() {
           <TabsTrigger value="catalogs">Catálogos (Produtos)</TabsTrigger>
           <TabsTrigger value="teams">Equipes</TabsTrigger>
           <TabsTrigger value="gyms">Academias (Retirada)</TabsTrigger>
+          <TabsTrigger value="users">Usuários e Acessos</TabsTrigger>
         </TabsList>
 
         <TabsContent value="catalogs">
@@ -75,6 +77,10 @@ export default function AdminDashboard() {
 
         <TabsContent value="gyms">
           <GymsTab />
+        </TabsContent>
+
+        <TabsContent value="users">
+          <UsersTab />
         </TabsContent>
       </Tabs>
     </div>

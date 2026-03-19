@@ -3,11 +3,13 @@ import { Header } from './Header'
 import { Footer } from './Footer'
 import { SidebarNav } from './SidebarNav'
 import { BottomNav } from './BottomNav'
-import { useStore } from '@/store'
+import { useAuth } from '@/hooks/use-auth'
 
 export function Layout() {
   const location = useLocation()
-  const { role } = useStore()
+  const { user } = useAuth()
+
+  const role = user?.role || 'GUEST'
 
   const isAdminPath = location.pathname.startsWith('/admin')
   const isProductionPath = location.pathname.startsWith('/production')
@@ -15,12 +17,11 @@ export function Layout() {
 
   const isAdminArea = isAdminPath || isProductionPath || isProfessorPath
 
-  // Access validation based on roles
-  if (isAdminPath && role !== 'ADMIN') return <Navigate to="/" replace />
+  if (isAdminPath && role !== 'ADMIN') return <Navigate to="/login" replace />
   if (isProductionPath && role !== 'ADMIN' && role !== 'PRODUCTION')
-    return <Navigate to="/" replace />
+    return <Navigate to="/login" replace />
   if (isProfessorPath && role !== 'ADMIN' && role !== 'PROFESSOR')
-    return <Navigate to="/" replace />
+    return <Navigate to="/login" replace />
 
   if (isAdminArea) {
     return (

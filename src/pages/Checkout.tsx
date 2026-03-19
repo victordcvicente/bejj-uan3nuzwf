@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useStore } from '../store'
+import { useAuth } from '../hooks/use-auth'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { Label } from '../components/ui/label'
@@ -17,19 +18,28 @@ import { useToast } from '../hooks/use-toast'
 
 export default function Checkout() {
   const { cart, clearCart, addOrder, teams, gyms } = useStore()
+  const { user } = useAuth()
   const { toast } = useToast()
   const navigate = useNavigate()
 
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
 
-  // Step 1 states
+  // Step 1 states - auto filled if user is logged in
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [cpf, setCpf] = useState('')
 
+  useEffect(() => {
+    if (user) {
+      setName(user.name || '')
+      setEmail(user.email || '')
+      setCpf(user.cpf || '')
+    }
+  }, [user])
+
   // Step 2 states
-  const [selectedGym, setSelectedGym] = useState('')
+  const [selectedGym, setSelectedGym] = useState(user?.gymId || '')
 
   // Step 3 states
   const [receipt, setReceipt] = useState<File | null>(null)
@@ -51,7 +61,6 @@ export default function Checkout() {
     )
   }
 
-  // Validations - strict required fields
   const isStep1Valid = name.trim().length >= 3 && email.includes('@') && cpf.length >= 11
   const isStep2Valid = selectedGym !== ''
   const isStep3Valid = receipt !== null
@@ -70,7 +79,7 @@ export default function Checkout() {
       }
 
       await addOrder({
-        userId: 'u1',
+        userId: user?.id || 'guest',
         customerName: name,
         customerEmail: email,
         customerCpf: cpf,
@@ -80,7 +89,7 @@ export default function Checkout() {
         total,
         paymentStatus: 'PENDING',
         productionStatus: 'PENDING',
-        receiptUrl: b64Receipt, // Salva o base64 para persistência real no text field
+        receiptUrl: b64Receipt,
       })
 
       clearCart()

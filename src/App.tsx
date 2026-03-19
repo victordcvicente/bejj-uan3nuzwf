@@ -3,10 +3,12 @@ import { Toaster } from '@/components/ui/toaster'
 import { Toaster as Sonner } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { StoreProvider } from '@/store'
+import { AuthProvider } from '@/hooks/use-auth'
 import { Layout } from '@/components/Layout'
-import { RoleSwitcher } from '@/components/RoleSwitcher'
 
 import Index from '@/pages/Index'
+import Login from '@/pages/Login'
+import Register from '@/pages/Register'
 import TeamHome from '@/pages/TeamHome'
 import Catalog from '@/pages/Catalog'
 import GlobalCatalog from '@/pages/GlobalCatalog'
@@ -21,35 +23,40 @@ import NotFound from '@/pages/NotFound'
 
 const App = () => (
   <BrowserRouter future={{ v7_startTransition: false, v7_relativeSplatPath: false }}>
-    <StoreProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <RoleSwitcher />
-        <Routes>
-          <Route element={<Layout />}>
-            <Route path="/" element={<Index />} />
+    <AuthProvider>
+      <StoreProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/" element={<Index />} />
 
-            {/* Global Student Routes */}
-            <Route path="/catalog" element={<GlobalCatalog />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/tracking" element={<Tracking />} />
+              {/* Auth Routes */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
 
-            {/* Management Routes */}
-            <Route path="/admin/*" element={<AdminDashboard />} />
-            <Route path="/production/*" element={<ProductionDashboard />} />
-            <Route path="/professor/*" element={<ProfessorDashboard />} />
+              {/* Global Routes */}
+              <Route path="/catalog" element={<GlobalCatalog />} />
+              <Route path="/checkout" element={<Checkout />} />
+              <Route path="/tracking" element={<Tracking />} />
 
-            {/* Team Specific Routes (must be last to not catch /checkout etc as slugs) */}
-            <Route path="/:teamSlug" element={<TeamHome />} />
-            <Route path="/:teamSlug/catalog" element={<Catalog />} />
-            <Route path="/:teamSlug/product/:productId" element={<ProductDetail />} />
-          </Route>
+              {/* Management Routes */}
+              <Route path="/admin/*" element={<AdminDashboard />} />
+              <Route path="/production/*" element={<ProductionDashboard />} />
+              <Route path="/professor/*" element={<ProfessorDashboard />} />
 
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </TooltipProvider>
-    </StoreProvider>
+              {/* Team Specific Routes */}
+              <Route path="/:teamSlug" element={<TeamHome />} />
+              <Route path="/:teamSlug/catalog" element={<Catalog />} />
+              <Route path="/:teamSlug/product/:productId" element={<ProductDetail />} />
+            </Route>
+
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </TooltipProvider>
+      </StoreProvider>
+    </AuthProvider>
   </BrowserRouter>
 )
 

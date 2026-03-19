@@ -1,10 +1,11 @@
 import { Link, useLocation } from 'react-router-dom'
 import { Home, ShieldAlert, Search, ShoppingBag } from 'lucide-react'
-import { useStore } from '@/store'
+import { useAuth } from '@/hooks/use-auth'
 
 export function BottomNav() {
   const location = useLocation()
-  const { role } = useStore()
+  const { user } = useAuth()
+  const role = user?.role || 'GUEST'
 
   const isActive = (path: string) => location.pathname === path
 

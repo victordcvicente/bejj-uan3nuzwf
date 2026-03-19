@@ -1,11 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { Team, Product, TeamProduct, Order, CartItem, Gym, Role } from './types'
+import { Team, Product, TeamProduct, Order, CartItem, Gym } from './types'
 import pb from '@/lib/pocketbase/client'
 import { useRealtime } from '@/hooks/use-realtime'
 
 interface StoreContextType {
-  role: Role
-  setRole: (role: Role) => void
   isLoading: boolean
   teams: Team[]
   gyms: Gym[]
@@ -40,14 +38,6 @@ interface StoreContextType {
 const StoreContext = createContext<StoreContextType | undefined>(undefined)
 
 export function StoreProvider({ children }: { children: ReactNode }) {
-  const [role, setRole] = useState<Role>(() => {
-    try {
-      return (localStorage.getItem('bejj_role') as Role) || 'ADMIN'
-    } catch {
-      return 'ADMIN'
-    }
-  })
-
   const [isLoading, setIsLoading] = useState(true)
   const [teams, setTeams] = useState<Team[]>([])
   const [gyms, setGyms] = useState<Gym[]>([])
@@ -62,10 +52,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       return []
     }
   })
-
-  useEffect(() => {
-    localStorage.setItem('bejj_role', role)
-  }, [role])
 
   useEffect(() => {
     localStorage.setItem('bejj_cart', JSON.stringify(cart))
@@ -171,8 +157,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   return (
     <StoreContext.Provider
       value={{
-        role,
-        setRole,
         isLoading,
         teams,
         gyms,

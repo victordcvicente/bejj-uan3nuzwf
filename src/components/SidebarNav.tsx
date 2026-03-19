@@ -1,12 +1,13 @@
 import { Link, useLocation } from 'react-router-dom'
 import { ShieldAlert, Cog, UserCog } from 'lucide-react'
-import { useStore } from '@/store'
+import { useAuth } from '@/hooks/use-auth'
 import { cn } from '@/lib/utils'
 import logoUrl from '../assets/image-6d323.png'
 
 export function SidebarNav() {
   const location = useLocation()
-  const { role } = useStore()
+  const { user } = useAuth()
+  const role = user?.role || 'GUEST'
 
   const links = [
     {
