@@ -18,9 +18,11 @@ export type Product = {
 export type CustomizationField = {
   id: string
   name: string
+  label: string
   type: 'text' | 'select'
   options?: string[]
   price: number
+  required?: boolean
 }
 
 export type TeamProduct = {
@@ -30,6 +32,7 @@ export type TeamProduct = {
   price: number
   sizes: string[]
   colors: string[]
+  models?: string[]
   inStock: boolean
   customizationFields: CustomizationField[]
 }
@@ -43,6 +46,7 @@ export type CartItem = {
   quantity: number
   size: string
   color: string
+  model?: string
   customizations: Record<string, string>
   image: string
 }

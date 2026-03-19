@@ -33,9 +33,9 @@ export default function Header() {
             {activeTeam ? (
               <img src={activeTeam.logo} alt={activeTeam.name} className="h-8 w-8 object-contain" />
             ) : (
-              <span className="bg-primary text-primary-foreground p-1 rounded font-bold">GLTS</span>
+              <span className="bg-primary text-primary-foreground p-1 rounded font-bold">BJJ</span>
             )}
-            <span className="hidden sm:inline">{activeTeam ? activeTeam.name : 'GÁLATAS CO.'}</span>
+            <span className="hidden sm:inline">{activeTeam ? activeTeam.name : 'PORTAL BJJ'}</span>
           </Link>
         </div>
 
@@ -103,12 +103,23 @@ export default function Header() {
                               </h4>
                               <p className="text-xs text-muted-foreground">{item.teamName}</p>
                               <div className="text-xs text-muted-foreground mt-1">
-                                {item.size} | {item.color}
-                                {Object.entries(item.customizations).map(([k, v]) => (
-                                  <span key={k} className="block mt-0.5">
-                                    + {k}: {v}
-                                  </span>
-                                ))}
+                                {[
+                                  item.size && `Tam: ${item.size}`,
+                                  item.color && `Cor: ${item.color}`,
+                                  item.model && `Mod: ${item.model}`,
+                                ]
+                                  .filter(Boolean)
+                                  .join(' | ')}
+                                {Object.entries(item.customizations).map(([k, v]) => {
+                                  if (v && v !== 'none') {
+                                    return (
+                                      <span key={k} className="block mt-0.5">
+                                        + {k}: {v}
+                                      </span>
+                                    )
+                                  }
+                                  return null
+                                })}
                               </div>
                               <div className="flex justify-between items-center mt-2">
                                 <span className="font-bold text-accent">

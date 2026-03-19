@@ -20,10 +20,11 @@ export default function ProductCard({ teamProduct, product, team }: Props) {
       Vermelho: '#dc2626',
       Roxa: '#7e22ce',
       Marrom: '#78350f',
-      Preta: '#000000',
       Amarelo: '#facc15',
       Rosa: '#f472b6',
       Verde: '#22c55e',
+      Dourado: '#D4AF37',
+      Prata: '#C0C0C0',
     }
     return map[colorName] || '#e5e7eb'
   }

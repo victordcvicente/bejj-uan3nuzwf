@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useStore } from '../store'
 import { Button } from '../components/ui/button'
@@ -33,15 +33,33 @@ export default function ProductDetail() {
     (tp) => tp.productId === productId && tp.teamId === team?.id,
   )
 
-  const [selectedSize, setSelectedSize] = useState(teamProduct?.sizes[0] || '')
-  const [selectedColor, setSelectedColor] = useState(teamProduct?.colors[0] || '')
+  const [selectedSize, setSelectedSize] = useState('')
+  const [selectedColor, setSelectedColor] = useState('')
+  const [selectedModel, setSelectedModel] = useState('')
   const [customValues, setCustomValues] = useState<Record<string, string>>({})
+
+  useEffect(() => {
+    if (teamProduct) {
+      if (teamProduct.sizes.length > 0) setSelectedSize(teamProduct.sizes[0])
+      if (teamProduct.colors.length > 0) setSelectedColor(teamProduct.colors[0])
+      if (teamProduct.models && teamProduct.models.length > 0)
+        setSelectedModel(teamProduct.models[0])
+
+      const defaults: Record<string, string> = {}
+      teamProduct.customizationFields.forEach((field) => {
+        if (field.type === 'select' && field.options?.length === 1) {
+          defaults[field.label] = field.options[0]
+        }
+      })
+      setCustomValues(defaults)
+    }
+  }, [teamProduct])
 
   if (!team || !product || !teamProduct)
     return <div className="p-20 text-center font-heading text-xl">Produto não encontrado.</div>
 
   const customPrice = teamProduct.customizationFields.reduce((acc, field) => {
-    if (customValues[field.name] && customValues[field.name].trim() !== '') {
+    if (customValues[field.label] && customValues[field.label].trim() !== '') {
       return acc + field.price
     }
     return acc
@@ -50,6 +68,32 @@ export default function ProductDetail() {
   const finalPrice = teamProduct.price + customPrice
 
   const handleAddToCart = () => {
+    const missingFields = []
+    if (teamProduct.sizes.length > 0 && !selectedSize) missingFields.push('Tamanho')
+    if (teamProduct.colors.length > 0 && !selectedColor) missingFields.push('Cor')
+    if (teamProduct.models && teamProduct.models.length > 0 && !selectedModel)
+      missingFields.push('Modelo')
+
+    for (const field of teamProduct.customizationFields) {
+      if (
+        field.required &&
+        (!customValues[field.label] ||
+          customValues[field.label].trim() === '' ||
+          customValues[field.label] === 'none')
+      ) {
+        missingFields.push(field.label)
+      }
+    }
+
+    if (missingFields.length > 0) {
+      toast({
+        title: 'Campos obrigatórios',
+        description: `Por favor, preencha: ${missingFields.join(', ')}`,
+        variant: 'destructive',
+      })
+      return
+    }
+
     addToCart({
       id: Math.random().toString(36).substr(2, 9),
       teamProductId: teamProduct.id,
@@ -59,6 +103,7 @@ export default function ProductDetail() {
       quantity: 1,
       size: selectedSize,
       color: selectedColor,
+      model: selectedModel,
       customizations: customValues,
       image: product.images[0],
     })
@@ -79,10 +124,11 @@ export default function ProductDetail() {
       Vermelho: '#dc2626',
       Roxa: '#7e22ce',
       Marrom: '#78350f',
-      Preta: '#000000',
       Amarelo: '#facc15',
       Rosa: '#f472b6',
       Verde: '#22c55e',
+      Dourado: '#D4AF37',
+      Prata: '#C0C0C0',
     }
     return map[colorName] || '#e5e7eb'
   }
@@ -98,7 +144,6 @@ export default function ProductDetail() {
       </Button>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16">
-        {/* Gallery */}
         <div className="space-y-4">
           <div className="aspect-[4/5] bg-muted rounded-xl overflow-hidden border border-border shadow-sm">
             <img
@@ -121,7 +166,6 @@ export default function ProductDetail() {
           )}
         </div>
 
-        {/* Details & Form */}
         <div className="flex flex-col">
           <p className="text-sm text-accent font-bold mb-2 uppercase tracking-widest">
             {product.category}
@@ -139,7 +183,24 @@ export default function ProductDetail() {
           </div>
 
           <div className="space-y-8 flex-1">
-            {/* Size */}
+            {teamProduct.models && teamProduct.models.length > 0 && (
+              <div>
+                <Label className="text-base font-bold mb-4 block">Modelo: {selectedModel}</Label>
+                <div className="flex flex-wrap gap-3">
+                  {teamProduct.models.map((m) => (
+                    <Button
+                      key={m}
+                      variant={selectedModel === m ? 'default' : 'outline'}
+                      className={`h-12 font-bold transition-all ${selectedModel === m ? 'bg-foreground text-background ring-2 ring-accent ring-offset-2 ring-offset-background' : 'hover:border-foreground'}`}
+                      onClick={() => setSelectedModel(m)}
+                    >
+                      {m}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {teamProduct.sizes.length > 0 && (
               <div>
                 <div className="flex justify-between items-center mb-4">
@@ -201,7 +262,6 @@ export default function ProductDetail() {
               </div>
             )}
 
-            {/* Color */}
             {teamProduct.colors.length > 0 && (
               <div>
                 <Label className="text-base font-bold mb-4 block">Cor: {selectedColor}</Label>
@@ -219,44 +279,46 @@ export default function ProductDetail() {
               </div>
             )}
 
-            {/* Customization */}
             {teamProduct.customizationFields.length > 0 && (
               <div className="pt-8 border-t border-border mt-8 space-y-6">
-                <h3 className="font-heading font-bold text-xl uppercase">
-                  Personalização (Opcional)
-                </h3>
+                <h3 className="font-heading font-bold text-xl uppercase">Personalização</h3>
                 {teamProduct.customizationFields.map((field) => (
                   <div
                     key={field.id}
                     className="bg-muted/30 p-4 rounded-lg border border-border/50"
                   >
                     <Label className="flex justify-between mb-3 text-base">
-                      <span className="font-medium">{field.name}</span>
+                      <span className="font-medium">
+                        {field.label}{' '}
+                        {field.required && <span className="text-destructive">*</span>}
+                      </span>
                       {field.price > 0 && (
                         <span className="text-accent font-bold">+ R$ {field.price.toFixed(2)}</span>
                       )}
                     </Label>
                     {field.type === 'text' ? (
                       <Input
-                        placeholder="Ex: SILVA"
+                        placeholder={
+                          field.name.includes('garrafa') ? 'Digite o nome desejado' : '...'
+                        }
                         className="bg-background"
-                        value={customValues[field.name] || ''}
+                        value={customValues[field.label] || ''}
                         onChange={(e) =>
-                          setCustomValues((prev) => ({ ...prev, [field.name]: e.target.value }))
+                          setCustomValues((prev) => ({ ...prev, [field.label]: e.target.value }))
                         }
                       />
                     ) : (
                       <Select
-                        value={customValues[field.name] || ''}
+                        value={customValues[field.label] || undefined}
                         onValueChange={(val) =>
-                          setCustomValues((prev) => ({ ...prev, [field.name]: val }))
+                          setCustomValues((prev) => ({ ...prev, [field.label]: val }))
                         }
                       >
                         <SelectTrigger className="bg-background">
                           <SelectValue placeholder="Selecione..." />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="none">Nenhum</SelectItem>
+                          {!field.required && <SelectItem value="none">Nenhum</SelectItem>}
                           {field.options?.map((opt) => (
                             <SelectItem key={opt} value={opt}>
                               {opt}

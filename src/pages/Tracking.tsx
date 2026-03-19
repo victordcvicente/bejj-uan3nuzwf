@@ -9,7 +9,7 @@ import { Badge } from '../components/ui/badge'
 export default function Tracking() {
   const { orders } = useStore()
   const [searchId, setSearchId] = useState('')
-  const [activeOrder, setActiveOrder] = useState(orders[0] || null) // Demo default to first
+  const [activeOrder, setActiveOrder] = useState(orders[0] || null)
 
   const handleSearch = () => {
     const found = orders.find((o) => o.id.toLowerCase() === searchId.toLowerCase())
@@ -34,7 +34,7 @@ export default function Tracking() {
         </h1>
         <div className="flex max-w-md mx-auto gap-2">
           <Input
-            placeholder="Nº do Pedido (Ex: ORD-001)"
+            placeholder="Nº do Pedido (Ex: BEJJ-0001)"
             value={searchId}
             onChange={(e) => setSearchId(e.target.value)}
             className="h-12"
@@ -62,7 +62,6 @@ export default function Tracking() {
                 </div>
               </div>
 
-              {/* Timeline */}
               <div className="relative flex justify-between mb-12">
                 <div className="absolute top-1/2 left-4 right-4 h-1 bg-muted -z-10 -translate-y-1/2"></div>
                 <div
@@ -116,7 +115,13 @@ export default function Tracking() {
                       <div className="flex-1">
                         <p className="font-bold text-sm line-clamp-1">{item.productName}</p>
                         <p className="text-xs text-muted-foreground">
-                          Tam: {item.size} | Cor: {item.color}
+                          {[
+                            item.size && `Tam: ${item.size}`,
+                            item.color && `Cor: ${item.color}`,
+                            item.model && `Mod: ${item.model}`,
+                          ]
+                            .filter(Boolean)
+                            .join(' | ')}
                         </p>
                         {Object.keys(item.customizations).length > 0 && (
                           <Badge variant="secondary" className="mt-1 text-[10px]">
