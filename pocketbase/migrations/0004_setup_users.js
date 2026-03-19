@@ -1,42 +1,42 @@
 migrate(
   (app) => {
-    const collection = app.findCollectionByNameOrId('users')
+    const col = app.findCollectionByNameOrId('users')
 
-    if (!collection.fields.getByName('role')) {
-      collection.fields.add(
+    // Fixed Invalid rule by removing the incorrect @request.data.role usage.
+    // PocketBase uses @request.body.role instead of @request.data for HTTP body properties.
+    col.createRule = ''
+    col.updateRule = '@request.auth.id = id'
+    col.viewRule = "@request.auth.id != ''"
+    col.listRule = "@request.auth.id != ''"
+
+    if (!col.fields.getByName('role')) {
+      col.fields.add(
         new SelectField({
           name: 'role',
-          values: ['ADMIN', 'GYM_OWNER', 'USER'],
+          values: ['ADMIN', 'GYM_OWNER', 'ATHLETE'],
           maxSelect: 1,
         }),
       )
     }
 
-    if (!collection.fields.getByName('name')) {
-      collection.fields.add(
+    if (!col.fields.getByName('name')) {
+      col.fields.add(
         new TextField({
           name: 'name',
         }),
       )
     }
 
-    collection.listRule = "@request.auth.id != ''"
-    collection.viewRule = "@request.auth.id != ''"
-    collection.createRule = ''
-    collection.updateRule = "@request.auth.id = id || @request.auth.role = 'ADMIN'"
-    collection.deleteRule = "@request.auth.id = id || @request.auth.role = 'ADMIN'"
-
-    app.save(collection)
+    app.save(col)
   },
   (app) => {
-    const collection = app.findCollectionByNameOrId('users')
+    const col = app.findCollectionByNameOrId('users')
 
-    collection.listRule = null
-    collection.viewRule = null
-    collection.createRule = null
-    collection.updateRule = null
-    collection.deleteRule = null
+    col.createRule = null
+    col.updateRule = null
+    col.viewRule = null
+    col.listRule = null
 
-    app.save(collection)
+    app.save(col)
   },
 )
