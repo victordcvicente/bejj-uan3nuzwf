@@ -20,20 +20,20 @@ export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { signIn, user } = useAuth()
+  const { signIn, user, loading } = useAuth()
   const navigate = useNavigate()
   const { toast } = useToast()
 
   // Intelligent redirection flow based on user role
   useEffect(() => {
-    if (user) {
+    if (!loading && user) {
       const role = user.role
       if (role === 'ADMIN') navigate('/admin', { replace: true })
       else if (role === 'PRODUCTION') navigate('/production', { replace: true })
       else if (role === 'PROFESSOR') navigate('/professor', { replace: true })
       else navigate('/', { replace: true })
     }
-  }, [user, navigate])
+  }, [user, loading, navigate])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

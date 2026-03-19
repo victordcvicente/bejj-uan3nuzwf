@@ -19,13 +19,36 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<any>(pb.authStore.record)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    let isMounted = true
+
+    const initAuth = async () => {
+      if (pb.authStore.isValid && pb.authStore.token) {
+        try {
+          await pb.collection('users').authRefresh()
+          if (isMounted) setUser(pb.authStore.record)
+        } catch (error) {
+          pb.authStore.clear()
+          if (isMounted) setUser(null)
+        }
+      } else {
+        if (isMounted) setUser(null)
+      }
+      if (isMounted) setLoading(false)
+    }
+
+    initAuth()
+
     const unsubscribe = pb.authStore.onChange((_token, record) => {
-      setUser(record)
+      if (isMounted) {
+        setUser(record)
+      }
     })
+
     return () => {
+      isMounted = false
       unsubscribe()
     }
   }, [])

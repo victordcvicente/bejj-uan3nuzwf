@@ -36,17 +36,17 @@ export default function Register() {
     professor: '',
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { signUp, user } = useAuth()
+  const { signUp, user, loading } = useAuth()
   const { teams, gyms } = useStore()
   const navigate = useNavigate()
   const { toast } = useToast()
 
   // Guard to prevent logged in users from seeing the register form
   useEffect(() => {
-    if (user) {
+    if (!loading && user) {
       navigate('/', { replace: true })
     }
-  }, [user, navigate])
+  }, [user, loading, navigate])
 
   const filteredGyms = form.teamId ? gyms.filter((g) => g.teamId === form.teamId) : gyms
 
