@@ -7,8 +7,10 @@ import { Search, ChevronRight, Shield, MapPin, Edit, Upload } from 'lucide-react
 import { useStore } from '@/store'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
+import { getErrorMessage } from '@/lib/pocketbase/errors'
+import { useToast } from '@/hooks/use-toast'
 
-const resizeImg = (f: File): Promise<string> =>
+const resizeImg = (f: File, maxWidth = 800): Promise<string> =>
   new Promise((res) => {
     const r = new FileReader()
     r.onload = (e) => {
@@ -17,14 +19,19 @@ const resizeImg = (f: File): Promise<string> =>
         const c = document.createElement('canvas')
         let w = i.width,
           h = i.height
-        if (w > 800) {
-          h = Math.round((h * 800) / w)
-          w = 800
+        if (w > maxWidth) {
+          h = Math.round((h * maxWidth) / w)
+          w = maxWidth
         }
         c.width = w
         c.height = h
-        c.getContext('2d')?.drawImage(i, 0, 0, w, h)
-        res(c.toDataURL('image/jpeg', 0.7))
+        const ctx = c.getContext('2d')
+        if (ctx) {
+          ctx.drawImage(i, 0, 0, w, h)
+          res(c.toDataURL('image/jpeg', 0.6))
+        } else {
+          res(e.target?.result as string)
+        }
       }
       i.src = e.target?.result as string
     }
@@ -33,6 +40,7 @@ const resizeImg = (f: File): Promise<string> =>
 
 export default function GlobalCatalog() {
   const { teams, gyms, role, updateTeam } = useStore()
+  const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState('')
   const [editTeamId, setEditTeamId] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -46,18 +54,32 @@ export default function GlobalCatalog() {
     e.preventDefault()
     e.stopPropagation()
     setEditTeamId(t.id)
-    setForm({ logo: t.logo, coverImage: t.coverImage })
+    setForm({ logo: t.logo || '', coverImage: t.coverImage || '' })
   }
 
   const handleSave = async () => {
     if (editTeamId) {
       setLoading(true)
       try {
-        await updateTeam(editTeamId, form)
+        const teamToUpdate = teams.find((t) => t.id === editTeamId)
+        // Ensure required fields are sent to avoid validation errors on PATCH
+        const payload = {
+          name: teamToUpdate?.name,
+          slug: teamToUpdate?.slug,
+          logo: form.logo,
+          coverImage: form.coverImage,
+        }
+        await updateTeam(editTeamId, payload)
         setEditTeamId(null)
-      } catch (e) {
+        toast({ title: 'Sucesso', description: 'Visual da equipe atualizado.' })
+      } catch (e: any) {
         console.error(e)
-        alert('Erro ao salvar as edições visuais da equipe.')
+        const errorMsg = getErrorMessage(e)
+        toast({
+          title: 'Erro ao salvar',
+          description: errorMsg,
+          variant: 'destructive',
+        })
       } finally {
         setLoading(false)
       }
@@ -70,7 +92,8 @@ export default function GlobalCatalog() {
   ) => {
     const file = e.target.files?.[0]
     if (file) {
-      const b64 = await resizeImg(file)
+      const maxWidth = field === 'logo' ? 400 : 1000
+      const b64 = await resizeImg(file, maxWidth)
       setForm((prev) => ({ ...prev, [field]: b64 }))
     }
   }
