@@ -1,10 +1,9 @@
 import { useStore } from '../../store'
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs'
-import { CatalogTab } from './tabs/CatalogTab'
 import { TeamsTab } from './tabs/TeamsTab'
 import { GymsTab } from './tabs/GymsTab'
-import { RulesTab } from './tabs/RulesTab'
+import { TeamCatalogsTab } from './tabs/TeamCatalogsTab'
 
 export default function AdminDashboard() {
   const { teams, products, teamProducts, gyms } = useStore()
@@ -15,7 +14,7 @@ export default function AdminDashboard() {
         <div>
           <h1 className="text-3xl font-heading font-black">Administração Global</h1>
           <p className="text-muted-foreground">
-            Gerencie equipes, academias, catálogo base e regras comerciais.
+            Gerencie equipes, catálogos por equipe e academias vinculadas.
           </p>
         </div>
       </div>
@@ -40,7 +39,7 @@ export default function AdminDashboard() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm text-muted-foreground font-medium">
-              Produtos Base
+              Total de Produtos
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -49,7 +48,9 @@ export default function AdminDashboard() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground font-medium">Atribuições</CardTitle>
+            <CardTitle className="text-sm text-muted-foreground font-medium">
+              Itens em Catálogos
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{teamProducts.length}</div>
@@ -57,16 +58,15 @@ export default function AdminDashboard() {
         </Card>
       </div>
 
-      <Tabs defaultValue="catalog" className="w-full">
+      <Tabs defaultValue="catalogs" className="w-full">
         <TabsList className="mb-4 flex-wrap h-auto gap-2 justify-start">
-          <TabsTrigger value="catalog">Catálogo Base</TabsTrigger>
-          <TabsTrigger value="teams">Gestão de Equipes</TabsTrigger>
+          <TabsTrigger value="catalogs">Catálogos (Produtos)</TabsTrigger>
+          <TabsTrigger value="teams">Equipes</TabsTrigger>
           <TabsTrigger value="gyms">Academias (Retirada)</TabsTrigger>
-          <TabsTrigger value="rules">Regras Comerciais</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="catalog">
-          <CatalogTab />
+        <TabsContent value="catalogs">
+          <TeamCatalogsTab />
         </TabsContent>
 
         <TabsContent value="teams">
@@ -75,10 +75,6 @@ export default function AdminDashboard() {
 
         <TabsContent value="gyms">
           <GymsTab />
-        </TabsContent>
-
-        <TabsContent value="rules">
-          <RulesTab />
         </TabsContent>
       </Tabs>
     </div>

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react'
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { Team, Product, TeamProduct, Order, CartItem, Gym } from './types'
 import {
   MOCK_TEAMS,
@@ -41,13 +41,34 @@ interface StoreContextType {
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined)
 
+function loadData<T>(key: string, fallback: T): T {
+  try {
+    const item = localStorage.getItem(key)
+    return item ? JSON.parse(item) : fallback
+  } catch (e) {
+    return fallback
+  }
+}
+
 export function StoreProvider({ children }: { children: ReactNode }) {
-  const [teams, setTeams] = useState<Team[]>(MOCK_TEAMS)
-  const [gyms, setGyms] = useState<Gym[]>(MOCK_GYMS)
-  const [products, setProducts] = useState<Product[]>(MOCK_PRODUCTS)
-  const [teamProducts, setTeamProducts] = useState<TeamProduct[]>(MOCK_TEAM_PRODUCTS)
-  const [orders, setOrders] = useState<Order[]>(MOCK_ORDERS)
+  const [teams, setTeams] = useState<Team[]>(() => loadData('bejj_teams', MOCK_TEAMS))
+  const [gyms, setGyms] = useState<Gym[]>(() => loadData('bejj_gyms', MOCK_GYMS))
+  const [products, setProducts] = useState<Product[]>(() =>
+    loadData('bejj_products', MOCK_PRODUCTS),
+  )
+  const [teamProducts, setTeamProducts] = useState<TeamProduct[]>(() =>
+    loadData('bejj_teamProducts', MOCK_TEAM_PRODUCTS),
+  )
+  const [orders, setOrders] = useState<Order[]>(() => loadData('bejj_orders', MOCK_ORDERS))
   const [cart, setCart] = useState<CartItem[]>([])
+
+  useEffect(() => {
+    localStorage.setItem('bejj_teams', JSON.stringify(teams))
+    localStorage.setItem('bejj_gyms', JSON.stringify(gyms))
+    localStorage.setItem('bejj_products', JSON.stringify(products))
+    localStorage.setItem('bejj_teamProducts', JSON.stringify(teamProducts))
+    localStorage.setItem('bejj_orders', JSON.stringify(orders))
+  }, [teams, gyms, products, teamProducts, orders])
 
   const addToCart = (item: CartItem) => setCart((prev) => [...prev, item])
   const removeFromCart = (id: string) => setCart((prev) => prev.filter((i) => i.id !== id))
