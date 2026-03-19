@@ -32,8 +32,7 @@ migrate(
     col.listRule = "@request.auth.role = 'ADMIN' || id = @request.auth.id"
     col.viewRule = "@request.auth.role = 'ADMIN' || id = @request.auth.id"
     col.updateRule = "@request.auth.role = 'ADMIN' || id = @request.auth.id"
-    col.createRule =
-      "@request.auth.role = 'ADMIN' || @request.body.role = 'STUDENT' || @request.body.role = ''"
+    col.createRule = ''
     col.deleteRule = "@request.auth.role = 'ADMIN' || id = @request.auth.id"
 
     app.save(col)
