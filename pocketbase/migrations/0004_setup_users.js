@@ -17,6 +17,9 @@ migrate(
     if (!col.fields.getByName('cpf')) {
       col.fields.add(new TextField({ name: 'cpf' }))
     }
+    if (!col.fields.getByName('professor')) {
+      col.fields.add(new TextField({ name: 'professor' }))
+    }
 
     try {
       const teamsCol = app.findCollectionByNameOrId('teams')
@@ -34,16 +37,14 @@ migrate(
       }
     } catch (e) {}
 
-    if (!col.fields.getByName('professor')) {
-      col.fields.add(new TextField({ name: 'professor' }))
-    }
-
     const passField = col.fields.getByName('password')
     if (passField && passField.min > 6) {
       passField.min = 6
     }
+    if (col.passwordAuth && col.passwordAuth.minPasswordLength > 6) {
+      col.passwordAuth.minPasswordLength = 6
+    }
 
-    // Use @request.body instead of @request.data for PocketBase v0.23+
     col.listRule = "id = @request.auth.id || @request.auth.role = 'ADMIN'"
     col.viewRule = "id = @request.auth.id || @request.auth.role = 'ADMIN'"
     col.updateRule = "id = @request.auth.id || @request.auth.role = 'ADMIN'"
@@ -51,21 +52,6 @@ migrate(
     col.createRule = ''
 
     app.save(col)
-
-    try {
-      const existing = app.findAuthRecordByEmail('users', 'admin@bejj.com.br')
-      existing.setPassword('123456')
-      existing.set('role', 'ADMIN')
-      app.save(existing)
-    } catch (e) {
-      const record = new Record(col)
-      record.setEmail('admin@bejj.com.br')
-      record.setPassword('123456')
-      record.setVerified(true)
-      record.set('role', 'ADMIN')
-      record.set('name', 'Administrador')
-      app.save(record)
-    }
   },
   (app) => {
     const col = app.findCollectionByNameOrId('users')
@@ -75,11 +61,12 @@ migrate(
     if (col.fields.getByName('teamId')) col.fields.removeByName('teamId')
     if (col.fields.getByName('gymId')) col.fields.removeByName('gymId')
     if (col.fields.getByName('professor')) col.fields.removeByName('professor')
-    app.save(col)
 
-    try {
-      const record = app.findAuthRecordByEmail('users', 'admin@bejj.com.br')
-      app.delete(record)
-    } catch (_) {}
+    const passField = col.fields.getByName('password')
+    if (passField) {
+      passField.min = 8
+    }
+
+    app.save(col)
   },
 )
