@@ -2,8 +2,6 @@ migrate(
   (app) => {
     const col = app.findCollectionByNameOrId('users')
 
-    let updated = false
-
     if (!col.fields.getByName('role')) {
       col.fields.add(
         new SelectField({
@@ -12,52 +10,40 @@ migrate(
           maxSelect: 1,
         }),
       )
-      updated = true
     }
     if (!col.fields.getByName('phone')) {
       col.fields.add(new TextField({ name: 'phone' }))
-      updated = true
     }
     if (!col.fields.getByName('cpf')) {
       col.fields.add(new TextField({ name: 'cpf' }))
-      updated = true
     }
-    if (!col.fields.getByName('teamId')) {
-      try {
-        const teamsCol = app.findCollectionByNameOrId('teams')
+
+    try {
+      const teamsCol = app.findCollectionByNameOrId('teams')
+      if (!col.fields.getByName('teamId')) {
         col.fields.add(
           new RelationField({ name: 'teamId', collectionId: teamsCol.id, maxSelect: 1 }),
         )
-        updated = true
-      } catch (e) {}
-    }
-    if (!col.fields.getByName('gymId')) {
-      try {
-        const gymsCol = app.findCollectionByNameOrId('gyms')
+      }
+    } catch (e) {}
+
+    try {
+      const gymsCol = app.findCollectionByNameOrId('gyms')
+      if (!col.fields.getByName('gymId')) {
         col.fields.add(new RelationField({ name: 'gymId', collectionId: gymsCol.id, maxSelect: 1 }))
-        updated = true
-      } catch (e) {}
-    }
+      }
+    } catch (e) {}
+
     if (!col.fields.getByName('professor')) {
       col.fields.add(new TextField({ name: 'professor' }))
-      updated = true
     }
 
     const passField = col.fields.getByName('password')
     if (passField && passField.min > 6) {
       passField.min = 6
-      updated = true
     }
 
-    if (col.createRule && col.createRule.includes('@request.data.')) {
-      col.createRule = col.createRule.replace(/@request\.data\./g, '@request.body.')
-      updated = true
-    }
-    if (col.updateRule && col.updateRule.includes('@request.data.')) {
-      col.updateRule = col.updateRule.replace(/@request\.data\./g, '@request.body.')
-      updated = true
-    }
-
+    // Use @request.body instead of @request.data for PocketBase v0.23+
     col.listRule = "id = @request.auth.id || @request.auth.role = 'ADMIN'"
     col.viewRule = "id = @request.auth.id || @request.auth.role = 'ADMIN'"
     col.updateRule = "id = @request.auth.id || @request.auth.role = 'ADMIN'"
@@ -93,9 +79,7 @@ migrate(
 
     try {
       const record = app.findAuthRecordByEmail('users', 'admin@bejj.com.br')
-      if (record) {
-        app.delete(record)
-      }
+      app.delete(record)
     } catch (_) {}
   },
 )
