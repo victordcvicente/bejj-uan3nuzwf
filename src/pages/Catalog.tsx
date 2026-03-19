@@ -12,11 +12,12 @@ export default function Catalog() {
   const [filterCategory, setFilterCategory] = useState<string | null>(null)
   const [inStockOnly, setInStockOnly] = useState(false)
 
-  const team = teams.find((t) => t.slug === teamSlug)
+  const team = useMemo(() => teams.find((t) => t.slug === teamSlug), [teams, teamSlug])
 
-  if (!team) return <Navigate to="/404" />
-
-  const teamProductsList = teamProducts.filter((tp) => tp.teamId === team.id)
+  const teamProductsList = useMemo(() => {
+    if (!team) return []
+    return teamProducts.filter((tp) => tp.teamId === team.id)
+  }, [teamProducts, team])
 
   // Dynamically extract categories available for this specific team
   const availableCategories = useMemo(() => {
@@ -27,6 +28,8 @@ export default function Catalog() {
     })
     return Array.from(cats).sort()
   }, [teamProductsList, products])
+
+  if (!team) return <Navigate to="/404" />
 
   let filteredProducts = teamProductsList
 
