@@ -2,8 +2,8 @@ migrate(
   (app) => {
     const col = app.findCollectionByNameOrId('users')
 
-    // Fixed Invalid rule by removing the incorrect @request.data.role usage.
-    // PocketBase uses @request.body.role instead of @request.data for HTTP body properties.
+    // Set correct access rules. @request.data is invalid in PocketBase, use @request.body if needed.
+    // For create rule, we keep it empty to allow user registration.
     col.createRule = ''
     col.updateRule = '@request.auth.id = id'
     col.viewRule = "@request.auth.id != ''"
