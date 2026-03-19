@@ -37,7 +37,9 @@ export function UsersTab() {
     try {
       const data = await getUsers()
       setUsers(data)
-    } catch (error) {}
+    } catch (error) {
+      console.error('Failed to load users:', error)
+    }
   }
 
   useEffect(() => {
