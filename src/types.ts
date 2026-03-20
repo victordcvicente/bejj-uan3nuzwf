@@ -1,5 +1,15 @@
 export type Role = 'ADMIN' | 'PRODUCTION' | 'PROFESSOR' | 'STUDENT'
 
+export type User = {
+  id: string
+  name: string
+  email: string
+  role: Role
+  avatar?: string
+  cpf?: string
+  gymId?: string
+}
+
 export type Team = {
   id: string
   slug: string
@@ -8,6 +18,7 @@ export type Team = {
   primaryColor: string
   coverImage: string
   description?: string
+  professors?: string[]
 }
 
 export type Gym = {
@@ -73,6 +84,7 @@ export type Order = {
   customerCpf?: string
   teamId: string
   gymId?: string
+  professorId?: string
   items: CartItem[]
   total: number
   paymentStatus: PaymentStatus

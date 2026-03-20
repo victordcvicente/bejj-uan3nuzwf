@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-03-20T15:15:52.384Z",
+  "generatedAt": "2026-03-20T15:41:02.988Z",
   "collections": [
     {
       "name": "users",
       "type": "auth",
       "apiRules": {
-        "list": "id = @request.auth.id || @request.auth.role = 'ADMIN'",
-        "view": "id = @request.auth.id || @request.auth.role = 'ADMIN'",
+        "list": "id = @request.auth.id || @request.auth.role = 'ADMIN' || role = 'PROFESSOR'",
+        "view": "id = @request.auth.id || @request.auth.role = 'ADMIN' || role = 'PROFESSOR'",
         "create": "",
         "update": "id = @request.auth.id || @request.auth.role = 'ADMIN'",
         "delete": "id = @request.auth.id || @request.auth.role = 'ADMIN'"
@@ -29,31 +29,21 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
+          "autodateTriggers": ["onCreate"]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
+          "autodateTriggers": ["onCreate", "onUpdate"]
         },
         {
           "name": "role",
           "type": "select",
           "required": true,
           "system": false,
-          "selectValues": [
-            "ADMIN",
-            "PRODUCTION",
-            "PROFESSOR",
-            "STUDENT"
-          ]
+          "selectValues": ["ADMIN", "PRODUCTION", "PROFESSOR", "STUDENT"]
         }
       ],
       "indexes": [
@@ -113,19 +103,21 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
+          "autodateTriggers": ["onCreate"]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "professors",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "users"
         }
       ],
       "indexes": []
@@ -165,19 +157,14 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
+          "autodateTriggers": ["onCreate"]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
+          "autodateTriggers": ["onCreate", "onUpdate"]
         },
         {
           "name": "email",
@@ -228,19 +215,14 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
+          "autodateTriggers": ["onCreate"]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
+          "autodateTriggers": ["onCreate", "onUpdate"]
         }
       ],
       "indexes": []
@@ -311,19 +293,14 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
+          "autodateTriggers": ["onCreate"]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
+          "autodateTriggers": ["onCreate", "onUpdate"]
         }
       ],
       "indexes": []
@@ -406,25 +383,27 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
+          "autodateTriggers": ["onCreate"]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
+          "autodateTriggers": ["onCreate", "onUpdate"]
         },
         {
           "name": "receiptUrl",
           "type": "file",
           "required": false,
           "system": false
+        },
+        {
+          "name": "professorId",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "users"
         }
       ],
       "indexes": []

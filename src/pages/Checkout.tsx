@@ -18,7 +18,7 @@ import { useToast } from '../hooks/use-toast'
 import { getErrorMessage } from '@/lib/pocketbase/errors'
 
 export default function Checkout() {
-  const { cart, clearCart, addOrder, teams, gyms } = useStore()
+  const { cart, clearCart, addOrder, teams, gyms, professors } = useStore()
   const { user } = useAuth()
   const { toast } = useToast()
   const navigate = useNavigate()
@@ -41,6 +41,7 @@ export default function Checkout() {
 
   // Step 2 states
   const [selectedGym, setSelectedGym] = useState(user?.gymId || '')
+  const [selectedProfessor, setSelectedProfessor] = useState('')
 
   // Step 3 states
   const [receipt, setReceipt] = useState<File | null>(null)
@@ -48,8 +49,12 @@ export default function Checkout() {
   const total = cart.reduce((acc, item) => acc + item.price * item.quantity, 0)
 
   const cartTeamName = cart[0]?.teamName
-  const teamId = teams.find((t) => t.name === cartTeamName)?.id
+  const team = teams.find((t) => t.name === cartTeamName)
+  const teamId = team?.id
   const availableGyms = gyms.filter((g) => g.teamId === teamId)
+
+  const teamProfessorIds = team?.professors || []
+  const availableProfessors = professors.filter((p) => teamProfessorIds.includes(p.id))
 
   if (cart.length === 0 && step !== 4) {
     return (
@@ -63,7 +68,11 @@ export default function Checkout() {
   }
 
   const isStep1Valid = name.trim().length >= 3 && email.includes('@') && cpf.length >= 11
-  const isStep2Valid = selectedGym !== '' && selectedGym !== 'none'
+  const isStep2Valid =
+    selectedGym !== '' &&
+    selectedGym !== 'none' &&
+    selectedProfessor !== '' &&
+    selectedProfessor !== 'none'
   const isStep3Valid = receipt !== null
 
   const handleFinish = async () => {
@@ -90,6 +99,10 @@ export default function Checkout() {
 
       if (selectedGym && selectedGym !== 'none') {
         payload.gymId = selectedGym
+      }
+
+      if (selectedProfessor && selectedProfessor !== 'none') {
+        payload.professorId = selectedProfessor
       }
 
       await addOrder(payload)
@@ -182,31 +195,58 @@ export default function Checkout() {
               <CardContent className="p-6 space-y-4">
                 <h2 className="text-xl font-bold mb-4">Retirada na Academia</h2>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Selecione a unidade onde deseja retirar seu pedido. Os produtos serão entregues no
-                  endereço da academia selecionada.
+                  Selecione a unidade onde deseja retirar seu pedido e o professor responsável pela
+                  compra.
                 </p>
-                <div>
-                  <Label>
-                    Selecione a Academia <span className="text-destructive">*</span>
-                  </Label>
-                  <Select value={selectedGym} onValueChange={setSelectedGym}>
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Escolha uma unidade..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {availableGyms.map((g) => (
-                        <SelectItem key={g.id} value={g.id}>
-                          {g.name}
-                        </SelectItem>
-                      ))}
-                      {availableGyms.length === 0 && (
-                        <SelectItem value="none">
-                          Nenhuma academia encontrada para esta equipe
-                        </SelectItem>
-                      )}
-                    </SelectContent>
-                  </Select>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label>
+                      Selecione a Academia <span className="text-destructive">*</span>
+                    </Label>
+                    <Select value={selectedGym} onValueChange={setSelectedGym}>
+                      <SelectTrigger className="mt-1 bg-background">
+                        <SelectValue placeholder="Escolha uma unidade..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableGyms.map((g) => (
+                          <SelectItem key={g.id} value={g.id}>
+                            {g.name}
+                          </SelectItem>
+                        ))}
+                        {availableGyms.length === 0 && (
+                          <SelectItem value="none" disabled>
+                            Nenhuma academia encontrada
+                          </SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label>
+                      Selecione o Professor <span className="text-destructive">*</span>
+                    </Label>
+                    <Select value={selectedProfessor} onValueChange={setSelectedProfessor}>
+                      <SelectTrigger className="mt-1 bg-background">
+                        <SelectValue placeholder="Escolha um professor..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableProfessors.map((p) => (
+                          <SelectItem key={p.id} value={p.id}>
+                            {p.name || p.email}
+                          </SelectItem>
+                        ))}
+                        {availableProfessors.length === 0 && (
+                          <SelectItem value="none" disabled>
+                            Nenhum professor encontrado para a equipe
+                          </SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
+
                 {selectedGym && selectedGym !== 'none' && (
                   <div className="p-4 bg-muted/50 rounded-lg text-sm border border-border mt-4">
                     <span className="font-bold block mb-1">Endereço de Entrega:</span>

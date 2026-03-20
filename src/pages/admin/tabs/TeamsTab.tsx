@@ -13,7 +13,8 @@ import {
 } from '@/components/ui/table'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
-import { Edit, Trash, PlusCircle, Upload } from 'lucide-react'
+import { Edit, Trash, PlusCircle } from 'lucide-react'
+import { Checkbox } from '@/components/ui/checkbox'
 
 const resizeImg = (f: File, maxW = 800): Promise<string> =>
   new Promise((res) => {
@@ -39,7 +40,7 @@ const resizeImg = (f: File, maxW = 800): Promise<string> =>
   })
 
 export function TeamsTab() {
-  const { teams, addTeam, updateTeam, deleteTeam } = useStore()
+  const { teams, addTeam, updateTeam, deleteTeam, professors } = useStore()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -50,6 +51,7 @@ export function TeamsTab() {
     logo: '',
     coverImage: '',
     description: '',
+    professors: [] as string[],
   })
 
   const handleEdit = (t: any) => {
@@ -61,13 +63,22 @@ export function TeamsTab() {
       logo: t.logo,
       coverImage: t.coverImage,
       description: t.description || '',
+      professors: t.professors || [],
     })
     setOpen(true)
   }
 
   const handleNew = () => {
     setEditingId(null)
-    setForm({ name: '', slug: '', primaryColor: '', logo: '', coverImage: '', description: '' })
+    setForm({
+      name: '',
+      slug: '',
+      primaryColor: '',
+      logo: '',
+      coverImage: '',
+      description: '',
+      professors: [],
+    })
     setOpen(true)
   }
 
@@ -168,7 +179,7 @@ export function TeamsTab() {
           <DialogHeader>
             <DialogTitle>{editingId ? 'Editar' : 'Nova'} Equipe</DialogTitle>
           </DialogHeader>
-          <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto px-1">
+          <div className="grid gap-4 py-4 max-h-[70vh] overflow-y-auto px-1">
             <div className="grid gap-2">
               <Label>Nome</Label>
               <Input
@@ -191,6 +202,39 @@ export function TeamsTab() {
                 placeholder="bg-blue-600"
               />
             </div>
+
+            <div className="grid gap-2">
+              <Label>Professores Vinculados</Label>
+              <div className="flex flex-col gap-2 max-h-40 overflow-y-auto border p-2 rounded-md bg-muted/20">
+                {professors.map((p) => (
+                  <div key={p.id} className="flex items-center gap-2">
+                    <Checkbox
+                      id={`prof-${p.id}`}
+                      checked={form.professors.includes(p.id)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setForm((prev) => ({ ...prev, professors: [...prev.professors, p.id] }))
+                        } else {
+                          setForm((prev) => ({
+                            ...prev,
+                            professors: prev.professors.filter((id) => id !== p.id),
+                          }))
+                        }
+                      }}
+                    />
+                    <Label htmlFor={`prof-${p.id}`} className="font-normal cursor-pointer text-sm">
+                      {p.name || p.email}
+                    </Label>
+                  </div>
+                ))}
+                {professors.length === 0 && (
+                  <span className="text-sm text-muted-foreground p-2">
+                    Nenhum professor cadastrado.
+                  </span>
+                )}
+              </div>
+            </div>
+
             <div className="grid gap-2">
               <Label>Logo da Equipe</Label>
               {form.logo && (

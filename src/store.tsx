@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { Team, Product, TeamProduct, Order, CartItem, Gym } from './types'
+import { Team, Product, TeamProduct, Order, CartItem, Gym, User } from './types'
 import pb from '@/lib/pocketbase/client'
 import { useRealtime } from '@/hooks/use-realtime'
 
@@ -10,6 +10,7 @@ interface StoreContextType {
   products: Product[]
   teamProducts: TeamProduct[]
   orders: Order[]
+  professors: User[]
   cart: CartItem[]
   addToCart: (item: CartItem) => void
   removeFromCart: (id: string) => void
@@ -44,6 +45,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [products, setProducts] = useState<Product[]>([])
   const [teamProducts, setTeamProducts] = useState<TeamProduct[]>([])
   const [orders, setOrders] = useState<Order[]>([])
+  const [professors, setProfessors] = useState<User[]>([])
   const [cart, setCart] = useState<CartItem[]>(() => {
     try {
       const item = localStorage.getItem('bejj_cart')
@@ -60,18 +62,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const loadData = async () => {
     try {
       setIsLoading(true)
-      const [t, g, p, tp, o] = await Promise.all([
+      const [t, g, p, tp, o, profs] = await Promise.all([
         pb.collection('teams').getFullList(),
         pb.collection('gyms').getFullList(),
         pb.collection('products').getFullList(),
         pb.collection('team_products').getFullList(),
         pb.collection('orders').getFullList({ sort: '-created' }),
+        pb.collection('users').getFullList({ filter: "role='PROFESSOR'" }),
       ])
       setTeams(t as any)
       setGyms(g as any)
       setProducts(p as any)
       setTeamProducts(tp as any)
       setOrders(o as any)
+      setProfessors(profs as any)
     } catch (error) {
       console.error('Error loading data:', error)
     } finally {
@@ -94,6 +98,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useRealtime('orders', async () =>
     setOrders((await pb.collection('orders').getFullList({ sort: '-created' })) as any),
   )
+  useRealtime('users', async () =>
+    setProfessors(
+      (await pb.collection('users').getFullList({ filter: "role='PROFESSOR'" })) as any,
+    ),
+  )
 
   const addToCart = (item: CartItem) => setCart((prev) => [...prev, item])
   const removeFromCart = (id: string) => setCart((prev) => prev.filter((i) => i.id !== id))
@@ -103,14 +112,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const { id, ...data } = order
     const formData = new FormData()
 
-    // Ensure we don't send empty strings, nulls, or invalid strings for any fields.
-    // Also parse objects into JSON strings and append File objects correctly for multipart upload.
     Object.keys(data).forEach((key) => {
       const val = (data as any)[key]
       if (val === '' || val === null || val === undefined || val === 'none') {
         // Skip entirely
       } else if (val instanceof File) {
         formData.append(key, val)
+      } else if (Array.isArray(val) && key !== 'items') {
+        // Handle array relations (if needed) by appending multiple times
+        val.forEach((v) => formData.append(key, String(v)))
       } else if (typeof val === 'object') {
         formData.append(key, JSON.stringify(val))
       } else {
@@ -181,6 +191,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         products,
         teamProducts,
         orders,
+        professors,
         cart,
         addToCart,
         removeFromCart,

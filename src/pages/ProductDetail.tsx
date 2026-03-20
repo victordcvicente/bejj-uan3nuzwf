@@ -38,6 +38,13 @@ export default function ProductDetail() {
   const [selectedColor, setSelectedColor] = useState('')
   const [selectedModel, setSelectedModel] = useState('')
   const [customValues, setCustomValues] = useState<Record<string, string>>({})
+  const [mainImage, setMainImage] = useState<string>('')
+
+  useEffect(() => {
+    if (product?.images?.length && (!mainImage || !product.images.includes(mainImage))) {
+      setMainImage(product.images[0])
+    }
+  }, [product?.images, mainImage])
 
   useEffect(() => {
     if (teamProduct) {
@@ -210,8 +217,8 @@ export default function ProductDetail() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16">
         <div className="space-y-4">
           <div className="aspect-[4/5] bg-muted rounded-xl overflow-hidden border border-border shadow-sm">
-            {images.length > 0 ? (
-              <img src={images[0]} alt={product.name} className="w-full h-full object-cover" />
+            {mainImage ? (
+              <img src={mainImage} alt={product.name} className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-muted-foreground">
                 Sem imagem
@@ -219,11 +226,16 @@ export default function ProductDetail() {
             )}
           </div>
           {images.length > 1 && (
-            <div className="flex gap-4">
-              {images.slice(1).map((img, i) => (
+            <div className="flex gap-4 overflow-x-auto pb-2">
+              {images.map((img, i) => (
                 <div
                   key={i}
-                  className="w-24 h-30 bg-muted rounded-md overflow-hidden cursor-pointer border-2 border-transparent hover:border-accent transition-colors"
+                  onClick={() => setMainImage(img)}
+                  className={`w-20 h-24 shrink-0 bg-muted rounded-md overflow-hidden cursor-pointer border-2 transition-all ${
+                    mainImage === img
+                      ? 'border-accent ring-2 ring-accent ring-offset-2 ring-offset-background scale-105'
+                      : 'border-transparent hover:border-accent hover:opacity-80'
+                  }`}
                 >
                   <img src={img} className="w-full h-full object-cover" alt="" />
                 </div>
