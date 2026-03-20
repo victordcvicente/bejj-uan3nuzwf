@@ -8,6 +8,7 @@ export type User = {
   avatar?: string
   cpf?: string
   gymId?: string
+  teams?: string[]
 }
 
 export type Team = {

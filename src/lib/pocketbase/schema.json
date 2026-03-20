@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-20T15:41:02.988Z",
+  "generatedAt": "2026-03-20T15:45:40.682Z",
   "collections": [
     {
       "name": "users",
@@ -44,6 +44,13 @@
           "required": true,
           "system": false,
           "selectValues": ["ADMIN", "PRODUCTION", "PROFESSOR", "STUDENT"]
+        },
+        {
+          "name": "teams",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "teams"
         }
       ],
       "indexes": [
